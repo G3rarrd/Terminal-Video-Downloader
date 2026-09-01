@@ -8,7 +8,7 @@ from textual.widgets import DataTable, Footer, Header, Digits, Button, Label, Ri
 from textual.reactive import reactive
 from textual.containers import HorizontalGroup, VerticalScroll, Vertical, Grid, Horizontal
 
-from src.video_downloader.frontend.components.download_modal.download_modal import DownloadModal
+from .components.download_modal.download_modal import DownloadModal
 
 TAB_NAMES = [
     "Download",
@@ -223,6 +223,6 @@ class TerminalVideoDownloadManager(App):
     #     container = self.query_one("#container")
     #     container.mount( Label("First"), Label("Second"), Button("Click me"))
 
+app = TerminalVideoDownloadManager()
 if __name__ == "__main__":
-    app = TerminalVideoDownloadManager()
     app.run()
