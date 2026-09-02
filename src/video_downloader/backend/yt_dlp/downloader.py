@@ -2,6 +2,8 @@ from src.video_downloader.backend.models.download_job import DownloadJob
 from src.video_downloader.backend.models.format_info import FormatInfo, FormatType
 import yt_dlp
 
+from src.video_downloader.backend.yt_dlp.config import get_ytdlp_opts
+
 class YtDlpDownloader:
     
     def _build_selector(self, fmt : FormatInfo) -> str:
@@ -22,14 +24,13 @@ class YtDlpDownloader:
         selector = self._build_selector(job.format)
         
         filename = job.filename or "%(title)s"
-        
-        ydl_opts = {
+        ydl_extra_opts = {
             "format": selector,
             "outtmpl": str(job.output_dir / f"{filename}.%(ext)s"),
-            "quiet": True,
-            "no_warnings": True,
             "merge_output_format": output_fmt,
         }
+        
+        ydl_opts = get_ytdlp_opts(ydl_extra_opts)
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([job.url])

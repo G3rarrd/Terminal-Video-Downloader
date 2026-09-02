@@ -6,32 +6,33 @@ from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Button, DirectoryTree, Input, Label
 
+from .input_field_orchestrator import InputFieldOrchestrator
+
 from .file_dialog import pick_directory_native
 
-class PathField(Widget):
+class PathField(InputFieldOrchestrator):
     """A self-contained widget for browsing and picking a directory path."""
+    class Submitted(Message):
+        def __init__(self):
+            super().__init__()
     
-    DEFAULT_CSS = """
-    PathField {
-        height: auto;
-        width: 100%;
-        margin-top: 1;
-    }
-    """
-    
-    def compose(self) -> ComposeResult:
-        yield Horizontal(
-            Label("Path: "),
-            Input(placeholder=str(Path.home()), id="path-input"),
-            Button("Browse", id="btn-browse"),
-            classes="input-field-row",
+    def __init__(self, **kwargs):
+        super().__init__(
+            label="PATH: ",
+            placeholder=str(Path.home()), 
+            input_id="path-input",
+            button_label="Browse", 
+            button_id="btn-browse", 
+            **kwargs
         )
-
+    
     def on_mount(self) -> None:
         self.display = False
         
     def load(self) -> None:
         self.display = True
+    
+
             
     @work(thread=True)
     def open_native_picker(self) -> None:

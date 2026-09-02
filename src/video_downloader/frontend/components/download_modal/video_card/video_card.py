@@ -10,13 +10,14 @@ from .thumbnail import Thumbnail
 
 class VideoCard(Widget):
     DEFAULT_CSS = """
-    VideoCard #video-card{
+    VideoCard #video-card {
         layout: grid;
-        grid-size: 2 1;         /* 2 columns, 1 row */
-        grid-columns: 1fr 3fr;  /* thumbnail column, description column */
+        grid-size: 2 1;
+        grid-columns: 1fr 3fr;
+        grid-rows: auto; 
         height: auto;
         display: none;
-        margin-top: 1;
+        margin-bottom: 1;
     }
     """
     

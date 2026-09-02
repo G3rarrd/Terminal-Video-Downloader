@@ -12,18 +12,20 @@ from textual_image.widget import Image as TextualImage
 class Thumbnail(Widget):
     """A self-contained widget that fetches and displays a thumbnail from a URL."""
     DEFAULT_CSS = """
+
     Thumbnail {
         width: 100%;
-        margin-right: 1;
-        height: auto
-        
+        margin-right: 2;
+        height: 100%; 
+
     }
-    
+
     Thumbnail #thumbnail-image {
         width: auto;
-        height: 100%;
-        align-vertical: middle;
+        height: auto;
+        max-height: 10; 
     }
+
     """
     def compose(self) -> ComposeResult:
         yield TextualImage(id="thumbnail-image")
@@ -68,7 +70,6 @@ class Thumbnail(Widget):
 
     def _on_error(self, message: str) -> None:
         self.log.error(f"Thumbnail failed to load: {message}")
-        # or post a custom message so the parent screen can show it in RichLog
         
     def clear(self) -> None:
         self.display = False

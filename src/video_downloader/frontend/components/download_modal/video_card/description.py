@@ -11,23 +11,27 @@ class Description(Widget):
     """A self-contained widget that displays video metadata (title, uploader, duration, etc.)."""
 
     DEFAULT_CSS = """
+        Description {
+            height: 100%;
+            width: 100%;
+        }
 
-    Description #desc-body {
-        height: auto;
-        align-vertical: middle;
-    }
-    
-    Description #desc-title {
-        text-style: bold;
-        height: 1fr;
-        width: 100%;
-    }
+        Description #desc-body {
+            height: auto;
+            align-vertical: middle;
+        }
 
-    Description .desc-row {
-        height: 1fr;
-        width: 100%;
-        color: $text-muted;
-    }
+        Description #desc-title {
+            text-style: bold;
+            height: auto;
+            width: 100%;
+        }
+
+        Description .desc-row {
+            height: auto;
+            width: 100%;
+            color: $text-muted;
+        }
     """
 
     def compose(self) -> ComposeResult:
@@ -58,10 +62,10 @@ class Description(Widget):
 
         self.query_one("#desc-title", Static).update(title)
         self.query_one("#desc-uploader", Label).update(
-            f"Uploader: {uploader}" if uploader else "?"
+            f"Uploader: " + (uploader if uploader else "?")
         )
         self.query_one("#desc-duration", Label).update(
-            f"Duration: {self._convert_duration(duration)}" if  duration else "?"
+            f"Duration: " + (self._convert_duration(duration) if  duration else "?")
         )
         self.display = True
         # self.query_one("#desc-views", Label).update(

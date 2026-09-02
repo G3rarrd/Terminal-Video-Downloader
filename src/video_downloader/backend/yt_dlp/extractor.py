@@ -5,6 +5,7 @@ import yt_dlp
 from src.video_downloader.backend.models.format_info import FormatType
 from src.video_downloader.backend.models.media_info import MediaInfo
 from src.video_downloader.backend.models.format_info import FormatInfo
+from src.video_downloader.backend.yt_dlp.config import get_ytdlp_opts
 
 
 class YtDlpExtractor:
@@ -29,11 +30,7 @@ class YtDlpExtractor:
         return FormatType.UNKNOWN
     
     def extract_metadata(self, url : str)-> MediaInfo:
-        ydl_opts = {
-            "quiet": True,
-            "no_warnings": True
-        }
-        
+        ydl_opts = get_ytdlp_opts()
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
 

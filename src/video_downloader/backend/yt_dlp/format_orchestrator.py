@@ -12,7 +12,7 @@ class FormatOrchestrator:
     def inspect_url(self, url : str)-> FormatSelection:
         media = self.extractor.extract_metadata(url)
         video : list[FormatInfo] = self.processor.get_video_formats(media.formats)
-        audio = self.processor.get_audio_formats(media.formats)
+        audio : list[FormatInfo] = self.processor.get_audio_formats(media.formats)
         
         return FormatSelection(
             media=media,

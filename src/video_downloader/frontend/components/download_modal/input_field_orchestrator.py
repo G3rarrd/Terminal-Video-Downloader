@@ -3,24 +3,31 @@ from textual.containers import Horizontal
 from textual.widget import Widget
 from textual.widgets import Label, Input, Button
 
-class LabeledActionField(Widget):
+class InputFieldOrchestrator(Widget):
     DEFAULT_CSS = """
-        LabeledActionField {
-                height: auto;        /* 👈 FIX: Prevents widget from collapsing to 0 height */
-                width: 100%;
-            }
-        LabeledActionField Horizontal {
+        InputFieldOrchestrator {
+            height: auto;
+            width: 100%;
+            margin-bottom: 1;
+        }
+        
+        InputFieldOrchestrator Horizontal {
             height: auto;
             align-vertical: middle;
         }
-        LabeledActionField Label {
+        
+        InputFieldOrchestrator Label {
             margin-right: 1;
             width: auto;
+            height: 100%;
+            content-align-vertical: middle;
         }
-        LabeledActionField Input {
+        
+        InputFieldOrchestrator Input {
             width: 2fr;
         }
-        LabeledActionField Button {
+        
+        InputFieldOrchestrator Button {
             width: auto;
             margin-left: 1;
         }
@@ -37,7 +44,7 @@ class LabeledActionField(Widget):
         self._input_id = input_id
         self._button_label = button_label
         self._button_id = button_id
-        
+
     def compose(self) -> ComposeResult:
         children = [
             Label(self._label),
@@ -48,3 +55,7 @@ class LabeledActionField(Widget):
             children.append(Button(self._button_label, id=self._button_id))
             
         yield Horizontal(*children)
+
+    @property
+    def value(self) -> str:
+        return self.query_one(f"#{self._input_id}", Input).value.strip()
