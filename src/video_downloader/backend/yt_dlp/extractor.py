@@ -1,11 +1,14 @@
 from typing import Optional
-
+from curl_cffi import requests
 import yt_dlp
 
-from src.video_downloader.backend.models.format_info import FormatType
-from src.video_downloader.backend.models.media_info import MediaInfo
-from src.video_downloader.backend.models.format_info import FormatInfo
-from src.video_downloader.backend.yt_dlp.config import get_ytdlp_opts
+from PIL import Image as PILImage
+import io
+from ..models.format_info import FormatType
+from ..models.media_info import MediaInfo
+from ..models.format_info import FormatInfo
+from .config import get_ytdlp_opts
+
 
 
 class YtDlpExtractor:
@@ -32,6 +35,7 @@ class YtDlpExtractor:
     def extract_metadata(self, url : str)-> MediaInfo:
         ydl_opts = get_ytdlp_opts()
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+
             info = ydl.extract_info(url, download=False)
 
             return MediaInfo(
@@ -43,6 +47,8 @@ class YtDlpExtractor:
                 formats=self._parse_formats(info)
             )
             
+
+        
     def _parse_formats(self, info: dict) -> list[FormatInfo]:
         formats = []
 
@@ -71,4 +77,5 @@ class YtDlpExtractor:
                     format_type=self._classify_format(vcodec, acodec)
                 )
             )
+            
         return formats

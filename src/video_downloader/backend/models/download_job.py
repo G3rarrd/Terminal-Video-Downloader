@@ -17,14 +17,12 @@ class JobStatus(Enum):
 
 @dataclass
 class DownloadJob:
+    
     url: str
     format: FormatInfo
+    filename: str
+    output_dir : Path 
     
-    id: UUID = field(default_factory=uuid4)
-    
-    output_dir : Path = field(default_factory=lambda: Path.home() / "Downloads")
-    
-    filename: str | None = None
     
     status: JobStatus = JobStatus.QUEUED
 
@@ -37,6 +35,8 @@ class DownloadJob:
     
     error: str | None = None
     
-    created_at: datetime = field(default_factory=datetime.now)
     started_at: datetime | None = None
     completed_at: datetime | None = None
+    
+    id: UUID = field(default_factory=uuid4)
+    created_at: datetime = field(default_factory=datetime.now)

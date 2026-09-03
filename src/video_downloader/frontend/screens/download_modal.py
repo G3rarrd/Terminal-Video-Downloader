@@ -6,16 +6,20 @@ from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Footer, RichLog, Static, Button
 import traceback
+
+from src.video_downloader.backend.download_service import DownloadService
 from src.video_downloader.backend.models.format_info import FormatInfo
 from src.video_downloader.backend.models.media_info import MediaInfo
-from src.video_downloader.backend.yt_dlp.format_orchestrator import FormatOrchestrator
-from src.video_downloader.frontend.components.download_modal.spinner import Spinner
-from .filename_field import FilenameField
+from src.video_downloader.frontend.models.download_requests import DownloadRequests
+from src.video_downloader.frontend.widgets.download_modal.spinner import Spinner
+from src.video_downloader.utils.clean_filename import clean_filename
+from ..widgets.download_modal.video_card import VideoCard
+from ..widgets.download_modal.filename_field import FilenameField
 
-from .format_options import FormatOptions
-from .path_field import PathField
-from .url_field import URLField
-from .video_card.video_card import VideoCard
+from ..widgets.download_modal.format_options import FormatOptions
+from ..widgets.download_modal.path_field import PathField
+from ..widgets.download_modal.url_field import URLField
+
 
 class DownloadModal(ModalScreen[bool]):
     """A modal popup to view detailed download info."""
@@ -72,7 +76,6 @@ class DownloadModal(ModalScreen[bool]):
         background: transparent;
     }
 
-
     #log-pane {
         dock: top;
         width: 100%;
@@ -86,21 +89,28 @@ class DownloadModal(ModalScreen[bool]):
         Binding(key="escape", action="close_modal", description="cancel"),
     ]
     
-    def __init__(self, **kwargs):
+    def __init__(self, service : DownloadService, **kwargs):
 
         super().__init__()
         
+        self.service = service
+        
+        self.webpage_url: str | None = None
+        self.auto_filename: str | None = None
+        self.media_info: MediaInfo | None = None
+        self.selected_format: FormatInfo | None = None
+        
         self._is_fetching: bool = False
+        
 
     def compose(self) -> ComposeResult:
         yield Vertical(
             Horizontal(URLField(id="url-field"), Spinner(id="spinner"), id="url-row"),
-            
             VideoCard(id="video-card"),
             FormatOptions(id="format-options"),
             PathField(id="path-selector"),
             FilenameField(id="filename-field"),
-            Button("Start Download", id="download-btn"),
+            Button("Add Download", id="download-btn"),
             Static("[b]enter[/b] confirm/next   [b]tab[/b] next   [b]esc[/b] cancel", id="hint-bar"),
             id="modal-container",
         )
@@ -116,7 +126,6 @@ class DownloadModal(ModalScreen[bool]):
         widget.border_title = "Add Download"
         self._clear_download_btn()
         
-
     def _reset(self) -> None:
         for selector, widget_type in (
             ("#video-card", VideoCard),
@@ -130,21 +139,25 @@ class DownloadModal(ModalScreen[bool]):
 
     @work(thread=True)
     def fetch_metadata(self, url_text: str) -> None:
+        self._is_fetching = True
+        
         spinner = self.query_one("#spinner", Spinner)
         
         self.app.call_from_thread(spinner.load)
         try:
-            data_extractor = FormatOrchestrator()
+
+            metadata = self.service.extract_metadata(url_text)
+
+            self.media_info = metadata.media
+            self.webpage_url = self.media_info.webpage_url
+            self.auto_filename = self.media_info.title
             
-            data = data_extractor.inspect_url(url_text)
-            
-            metadata : MediaInfo = data.media
-            video_formats : list[FormatInfo] = data.video_formats
-            
-            self.app.call_from_thread(lambda: self.notify(f"[green]Got metadata:[/green] {metadata.title}"))
+            video_formats : list[FormatInfo] = metadata.video_formats
+
+            self.app.call_from_thread(lambda: self.notify(f"[green]Got metadata:[/green] {self.media_info.title}"))
 
             video_card = self.query_one("#video-card", VideoCard)
-            self.app.call_from_thread(video_card.load, metadata)
+            self.app.call_from_thread(video_card.load, self.media_info)
 
             format_options = self.query_one("#format-options", FormatOptions)
             self.app.call_from_thread(format_options.load, video_formats)
@@ -155,24 +168,14 @@ class DownloadModal(ModalScreen[bool]):
             filename_field = self.query_one("#filename-field", FilenameField)
             self.app.call_from_thread(filename_field.load)
             
-            
             self.app.call_from_thread(self._load_download_btn)
             
         except Exception:
-            self.app.call_from_thread(
-                lambda: self.notify(f"[bold red]Failed to fetch URL:[/bold red] {traceback.format_exc()}")
-            )
+            self.app.call_from_thread(lambda: self.notify(f"[bold red]Failed to fetch URL:[/bold red] {traceback.format_exc()}"))
             
         finally:
             self._is_fetching = False
-            
-            
             self.app.call_from_thread(spinner.clear)
-    
-    # def _on_fetch_success() -> None:
-    #     # Unlock UI when finished
-    #     self._set_fetching_state(False)
-    #     self.notify("Metadata loaded successfully!")
 
     @on(URLField.Submitted)
     def on_url_field_submitted(self, event: URLField.Submitted) -> None:
@@ -188,6 +191,7 @@ class DownloadModal(ModalScreen[bool]):
         self._reset()
         
         self.notify(f"[green]Fetching URL info for:[/green] {event.url}")
+        
         self.fetch_metadata(event.url)
         
         
@@ -195,23 +199,35 @@ class DownloadModal(ModalScreen[bool]):
     def on_download_pressed(self, event: Button.Pressed) -> None:
         event.stop()
 
-        url_field = self.query_one("#url-field", URLField)
         format_options = self.query_one("#format-options", FormatOptions)
+        filename_field = self.query_one("#filename-field", FilenameField)
+        path_field = self.query_one("#path-selector", PathField)
         
-        url = url_field.value
+        url = self.webpage_url
         selected_format = format_options.selected_format
+        filename = filename_field.value
+        output_dir = path_field.value
         
-        if not url:
-            self.notify("URL cannot be empty!", severity="error")
-            return
+        if not output_dir:
+            output_dir = path_field.default_path
+        
+        if not filename:
+            filename = clean_filename(self.auto_filename)
         
         if not selected_format:
             self.notify("Please select a video format!", severity="error")
             return
         
-        self.notify(
-            f"Starting download: {url} with format {selected_format}"
+        request = DownloadRequests(
+            url=url,
+            format=selected_format,
+            filename=clean_filename(filename),
+            output_dir=Path(output_dir)
         )
+        
+        self.notify(f"Starting download: {url}")
+        
+        self.service.add_download_job(request)
 
     def action_close_modal(self) -> None:
         self.dismiss(True)

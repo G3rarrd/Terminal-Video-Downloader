@@ -10,6 +10,8 @@ from .input_field_orchestrator import InputFieldOrchestrator
 
 from .file_dialog import pick_directory_native
 
+DEFAULT_PATH : Path = Path.home()
+
 class PathField(InputFieldOrchestrator):
     """A self-contained widget for browsing and picking a directory path."""
     class Submitted(Message):
@@ -19,7 +21,7 @@ class PathField(InputFieldOrchestrator):
     def __init__(self, **kwargs):
         super().__init__(
             label="PATH: ",
-            placeholder=str(Path.home()), 
+            placeholder=str(DEFAULT_PATH), 
             input_id="path-input",
             button_label="Browse", 
             button_id="btn-browse", 
@@ -32,8 +34,10 @@ class PathField(InputFieldOrchestrator):
     def load(self) -> None:
         self.display = True
     
-
-            
+    @property
+    def default_path(self):
+        return DEFAULT_PATH   
+       
     @work(thread=True)
     def open_native_picker(self) -> None:
         current = self.query_one("#path-input", Input).value

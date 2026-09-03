@@ -59,3 +59,4 @@ class InputFieldOrchestrator(Widget):
     @property
     def value(self) -> str:
         return self.query_one(f"#{self._input_id}", Input).value.strip()
+    

@@ -63,7 +63,7 @@ class FormatProcessor:
         unique : dict[tuple[str, str], FormatInfo]= {}
 
         for fmt in formats:
-            key = (fmt.height, fmt.extension)
+            key = (fmt.height, fmt.extension, fmt.video_codec)
 
             current = unique.get(key)
 

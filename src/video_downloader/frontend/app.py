@@ -8,17 +8,17 @@ from textual.widgets import DataTable, Footer, Header, Digits, Button, Label, Ri
 from textual.reactive import reactive
 from textual.containers import HorizontalGroup, VerticalScroll, Vertical, Grid, Horizontal
 
-from .components.download_modal.download_modal import DownloadModal
+from src.video_downloader.backend.download_service import DownloadService
+from src.video_downloader.frontend.screens.download_modal import DownloadModal
+class TerminalVideoDownloadManagerApp(App):
+    def __init__(self, service : DownloadService):
+        super().__init__()
+        self.service = service
+        
+    DEFAULT_CSS = """
+    """
 
-
-class TerminalVideoDownloadManager(App):
-    CSS = """
-
-        """
-
-    BINDINGS = [
-            ("a", "add_url", "Add URL"),
-        ]
+    BINDINGS = [("a", "add_url", "Add URL")]
     
     def compose(self) -> ComposeResult:
         yield Footer()
@@ -30,23 +30,10 @@ class TerminalVideoDownloadManager(App):
         # Handles the return value from self.dismiss()
         self.notify(f"Modal dismissed with result: {result}")
 
-        
     def action_add_url(self):
-        self.push_screen(DownloadModal(), self.on_modal_closed)
-        
-    # def action_add_download_modal(self)-> None:
-    #     def on_modal_close(result : dict | None) -> None:
-    #         if result:
-    #             self.notify(f"Starting download: {result['url']}")
-    #         else:
-    #             self.notify("Cancelled", severity="warning")
-            
-    #     self.push_screen(DownloadModal(), on_modal_close)
-        
-    # def action_append_download(self):
-    #     container = self.query_one("#container")
-    #     container.mount( Label("First"), Label("Second"), Button("Click me"))
+        self.push_screen(DownloadModal(self.service), self.on_modal_closed)
 
-app = TerminalVideoDownloadManager()
+
 if __name__ == "__main__":
+    app = TerminalVideoDownloadManagerApp()
     app.run()

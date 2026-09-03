@@ -59,13 +59,12 @@ class Description(Widget):
         uploader = metadata.uploader or "Untitled"
         duration = metadata.duration or None
         # view_count = metadata.
-
         self.query_one("#desc-title", Static).update(title)
         self.query_one("#desc-uploader", Label).update(
             f"Uploader: " + (uploader if uploader else "?")
         )
         self.query_one("#desc-duration", Label).update(
-            f"Duration: " + (self._convert_duration(duration) if  duration else "?")
+            f"Duration: " + (self._convert_duration(int(duration)) if duration else "?")
         )
         self.display = True
         # self.query_one("#desc-views", Label).update(

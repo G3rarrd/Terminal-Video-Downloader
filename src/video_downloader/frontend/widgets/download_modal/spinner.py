@@ -28,7 +28,7 @@ class Spinner(Static):
     def load(self):
         self.stop()
         self.frame_idx = 0
-        self._timer = self.set_interval(0.1, self.update_spinner)
+        self._timer = self.set_interval(0.05, self.update_spinner)
         self.display = True
         
     def stop(self) -> None:

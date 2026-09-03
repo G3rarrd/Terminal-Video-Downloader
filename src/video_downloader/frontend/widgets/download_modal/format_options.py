@@ -59,7 +59,7 @@ class FormatOptions(Widget):
 
     def _format_label(self, fmt: FormatInfo) -> str:
         size = f"{fmt.filesize / 1_000_000:.1f} MB" if fmt.filesize else "? MB"
-        return f"{fmt.resolution or '?'} · {fmt.extension or '?'} · {size}"
+        return f"{fmt.resolution or '?'} · {fmt.video_codec or "?"} · {size} · {fmt.extension or '?'} "
 
     def clear(self) -> None:
         self.display = False

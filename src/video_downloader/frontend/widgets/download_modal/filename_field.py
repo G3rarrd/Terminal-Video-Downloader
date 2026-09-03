@@ -24,6 +24,5 @@ class FilenameField(InputFieldOrchestrator):
     
     def clear(self):
         self.display = False
-        pass
-    
+        
     

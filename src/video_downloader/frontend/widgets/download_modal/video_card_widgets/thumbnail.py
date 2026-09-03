@@ -1,4 +1,6 @@
 import io
+from typing import Optional
+from curl_cffi import requests
 import httpx
 from PIL import Image as PILImage
 from textual import work
@@ -36,34 +38,25 @@ class Thumbnail(Widget):
     def load(self, thumbnail_url: str) -> None:
         if not thumbnail_url:
             return
-        self._fetch(thumbnail_url)
+        self._fetch_thumbnail(thumbnail_url)
         self.display = True
 
-    @work(thread=True)
-    def _fetch(self, thumbnail_url: str) -> None:
-        # 1. Set explicit, generous timeouts for connect and handshake operations
-        timeout = httpx.Timeout(connect=15.0, read=15.0, write=15.0, pool=15.0)
-        
-        # 2. Emulate a standard browser user-agent to avoid CDN rate-limiting/throttling
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-        }
+    @work(thread=True)    
+    def _fetch_thumbnail(self, thumbnail_url : str) -> Optional[PILImage.Image]:
         try:
-            with httpx.Client(
-                timeout=timeout, 
-                headers=headers, 
-                follow_redirects=True,
-                verify=True
-            ) as client:
-                res = client.get(thumbnail_url)
-                res.raise_for_status()
+            with requests.Session(impersonate="firefox", timeout=30) as session:
+                response = session.get(thumbnail_url)
+                response.raise_for_status()
                 
-        except httpx.HTTPError as e:
-            self.app.call_from_thread(self._on_error, str(e))
-            return
-
-        pil_img = PILImage.open(io.BytesIO(res.content))
-        self.app.call_from_thread(self._on_loaded, pil_img)
+                with io.BytesIO(response.content) as buffer:
+                    img = PILImage.open(buffer)
+                    img.load()
+                    
+                self.app.call_from_thread(self._on_loaded, img)
+                return img
+            
+        except Exception as exc:
+            print(f"Failed to fetch thumbnail: {exc}")
 
     def _on_loaded(self, pil_img: PILImage.Image) -> None:
         self.query_one("#thumbnail-image", TextualImage).image = pil_img
