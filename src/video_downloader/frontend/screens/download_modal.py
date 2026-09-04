@@ -7,15 +7,15 @@ from textual.screen import ModalScreen
 from textual.widgets import Footer, RichLog, Static, Button
 import traceback
 
-from src.video_downloader.backend.download_service import DownloadService
-from src.video_downloader.backend.models.format_info import FormatInfo
-from src.video_downloader.backend.models.media_info import MediaInfo
-from src.video_downloader.frontend.models.download_requests import DownloadRequests
-from src.video_downloader.frontend.widgets.download_modal.spinner import Spinner
+from src.video_downloader.service.download_service import DownloadService
+from src.video_downloader.models.format_info import FormatInfo
+from src.video_downloader.models.media_info import MediaInfo
 from src.video_downloader.utils.clean_filename import clean_filename
+
+from ...models.download_requests import DownloadRequests
+from ..widgets.download_modal.spinner import Spinner
 from ..widgets.download_modal.video_card import VideoCard
 from ..widgets.download_modal.filename_field import FilenameField
-
 from ..widgets.download_modal.format_options import FormatOptions
 from ..widgets.download_modal.path_field import PathField
 from ..widgets.download_modal.url_field import URLField
@@ -94,14 +94,9 @@ class DownloadModal(ModalScreen[bool]):
         super().__init__()
         
         self.service = service
-        
-        self.webpage_url: str | None = None
-        self.auto_filename: str | None = None
+
         self.media_info: MediaInfo | None = None
-        self.selected_format: FormatInfo | None = None
-        
         self._is_fetching: bool = False
-        
 
     def compose(self) -> ComposeResult:
         yield Vertical(
@@ -149,8 +144,6 @@ class DownloadModal(ModalScreen[bool]):
             metadata = self.service.extract_metadata(url_text)
 
             self.media_info = metadata.media
-            self.webpage_url = self.media_info.webpage_url
-            self.auto_filename = self.media_info.title
             
             video_formats : list[FormatInfo] = metadata.video_formats
 
@@ -203,7 +196,9 @@ class DownloadModal(ModalScreen[bool]):
         filename_field = self.query_one("#filename-field", FilenameField)
         path_field = self.query_one("#path-selector", PathField)
         
-        url = self.webpage_url
+        url = self.media_info.webpage_url
+        title = self.media_info.title
+        
         selected_format = format_options.selected_format
         filename = filename_field.value
         output_dir = path_field.value
@@ -212,7 +207,7 @@ class DownloadModal(ModalScreen[bool]):
             output_dir = path_field.default_path
         
         if not filename:
-            filename = clean_filename(self.auto_filename)
+            filename = clean_filename(title)
         
         if not selected_format:
             self.notify("Please select a video format!", severity="error")

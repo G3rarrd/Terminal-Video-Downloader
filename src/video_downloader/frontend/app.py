@@ -8,7 +8,8 @@ from textual.widgets import DataTable, Footer, Header, Digits, Button, Label, Ri
 from textual.reactive import reactive
 from textual.containers import HorizontalGroup, VerticalScroll, Vertical, Grid, Horizontal
 
-from src.video_downloader.backend.download_service import DownloadService
+from src.video_downloader.frontend.screens.download_manager import DownloadManagerScreen
+from src.video_downloader.service.download_service import DownloadService
 from src.video_downloader.frontend.screens.download_modal import DownloadModal
 class TerminalVideoDownloadManagerApp(App):
     def __init__(self, service : DownloadService):
@@ -20,9 +21,12 @@ class TerminalVideoDownloadManagerApp(App):
 
     BINDINGS = [("a", "add_url", "Add URL")]
     
-    def compose(self) -> ComposeResult:
-        yield Footer()
-        
+    # def compose(self) -> ComposeResult:
+    #     yield Vertical(
+    #         Footer()
+    #     )
+    def on_mount(self) -> None:
+        self.push_screen(DownloadManagerScreen())
     def action_toggle_dark(self) -> None:
         self.theme = ("textual-dark" if self.theme == "textual-light" else "textual-light")
       

@@ -9,6 +9,8 @@ def get_ytdlp_opts(
     """Base options for yt-dlp with anti-bot evasion and curl-cffi TLS impersonation."""
     opts: Dict[str, Any] = {
         "impersonate": "firefox",
+        'js_runtimes': {'deno': {}, 'node': {}},
+        # 'extractor_args': {'youtube': {'player_client': ['web', 'android', 'ios']}},
         "quiet": True,
         "no_warnings": True,
     }

@@ -4,7 +4,7 @@ from textual.app import ComposeResult
 from textual.widget import Widget
 from textual.widgets import Select
 from textual.message import Message
-from src.video_downloader.backend.models.format_info import FormatInfo
+from src.video_downloader.models.format_info import FormatInfo
 
 
 class FormatOptions(Widget):

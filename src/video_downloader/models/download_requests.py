@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from src.video_downloader.backend.models.format_info import FormatInfo
+from src.video_downloader.models.format_info import FormatInfo
 
 @dataclass
 class DownloadRequests:

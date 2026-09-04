@@ -4,9 +4,9 @@ import yt_dlp
 
 from PIL import Image as PILImage
 import io
-from ..models.format_info import FormatType
-from ..models.media_info import MediaInfo
-from ..models.format_info import FormatInfo
+from ...models.format_info import FormatType
+from ...models.media_info import MediaInfo
+from ...models.format_info import FormatInfo
 from .config import get_ytdlp_opts
 
 

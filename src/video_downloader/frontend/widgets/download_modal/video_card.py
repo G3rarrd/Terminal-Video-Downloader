@@ -2,7 +2,7 @@ from textual.app import ComposeResult
 from textual.containers import Grid
 from textual.widget import Widget
 
-from src.video_downloader.backend.models.media_info import MediaInfo
+from src.video_downloader.models.media_info import MediaInfo
 
 from .video_card_widgets.description import Description
 from .video_card_widgets.thumbnail import Thumbnail

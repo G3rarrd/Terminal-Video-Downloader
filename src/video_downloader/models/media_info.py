@@ -1,4 +1,4 @@
-from src.video_downloader.backend.models.format_info import FormatInfo
+from src.video_downloader.models.format_info import FormatInfo
 from dataclasses import dataclass
 
 @dataclass

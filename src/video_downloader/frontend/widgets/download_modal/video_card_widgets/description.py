@@ -3,7 +3,7 @@ from textual.containers import Vertical, VerticalScroll
 from textual.widget import Widget
 from textual.widgets import Label, Static
 
-from src.video_downloader.backend.models.media_info import MediaInfo
+from src.video_downloader.models.media_info import MediaInfo
 
 
 
