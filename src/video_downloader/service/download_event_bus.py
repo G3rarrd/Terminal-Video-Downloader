@@ -27,9 +27,28 @@ class DownloadEventBus:
     def subscribe_to_job(self, job_id: UUID, listener: ProgressListener) -> Callable[[], None]:
         with self._lock:
             self._job_listeners.setdefault(job_id, []).append(listener)
+            
+        return lambda : self._unsubscribe_job(job_id, listener)
         
-    def _unsubscribe_job(self, job_id: UUID, listener: ProgressListener) -> None:
+    def _unsubscribe_job(
+        self, 
+        job_id: UUID, 
+        listener: ProgressListener
+    ) -> None:
         with self._lock:
             listeners = self._job_listeners.get(job_id, [])
+
             if listener in listeners:
                 listeners.remove(listener)
+                
+    def publish(self, progress: DownloadProgress) -> None:
+        with self._lock:
+            job_listeners = list(self._job_listeners.get(progress.job_id, []))
+            
+        for listener in job_listeners:
+            try:
+                listener(progress)
+            except Exception:
+                pass
+                
+    

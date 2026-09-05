@@ -14,12 +14,13 @@ class JobStatus(Enum):
     FAILED = "failed"
     COMPLETED = "completed"
     PROCESSING = "processing"
+    ERROR = "error" 
 
 @dataclass(frozen=True)
 class DownloadProgress:
     job_id: UUID
     status: JobStatus
-    progress: float = 0.0
+    progress_pct: float = 0.0
     downloaded_bytes: int = 0
     total_bytes: int = 0
     speed: float | None = None

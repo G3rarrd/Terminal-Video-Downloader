@@ -46,6 +46,7 @@ class FormatOptions(Widget):
         if not video_formats:
             self.clear()
             return
+        
         self._formats = video_formats
         self._formats_by_id = {fmt.format_id: fmt for fmt in video_formats}
         
@@ -58,9 +59,14 @@ class FormatOptions(Widget):
         self.display = True
 
     def _format_label(self, fmt: FormatInfo) -> str:
+        resolution = (fmt.resolution or "?").ljust(10)
+        codec = (fmt.video_codec or "?").ljust(15)
         size = f"{fmt.filesize / 1_000_000:.1f} MB" if fmt.filesize else "? MB"
-        return f"{fmt.resolution or '?'} · {fmt.video_codec or "?"} · {size} · {fmt.extension or '?'} "
+        size = size.ljust(9)
+        extension = (fmt.extension or "?").ljust(5)
 
+        return f"{resolution}· {codec}· {size}· {extension}"
+    
     def clear(self) -> None:
         self.display = False
         self.query_one(Select).set_options([])

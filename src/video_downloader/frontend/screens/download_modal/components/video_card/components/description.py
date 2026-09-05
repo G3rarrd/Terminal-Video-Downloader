@@ -4,6 +4,7 @@ from textual.widget import Widget
 from textual.widgets import Label, Static
 
 from src.video_downloader.models.media_info import MediaInfo
+from src.video_downloader.utils.conversions import convert_duration
 
 
 
@@ -64,22 +65,14 @@ class Description(Widget):
             f"Uploader: " + (uploader if uploader else "?")
         )
         self.query_one("#desc-duration", Label).update(
-            f"Duration: " + (self._convert_duration(int(duration)) if duration else "?")
+            f"Duration: " + (convert_duration(int(duration)) if duration else "?")
         )
         self.display = True
         # self.query_one("#desc-views", Label).update(
         #     f"Views: {view_count:,}" if view_count else ""
         # )
         
-    def _convert_duration(self, duration: int) -> str:
-        hours, remainder = divmod(duration, 3600)
-        minutes, seconds = divmod(remainder, 60)
 
-        parts = [hours, minutes, seconds]
-        while len(parts) > 1 and parts[0] == 0:
-            parts.pop(0)
-
-        return ":".join(f"{p:02d}" for p in parts)
 
     def clear(self) -> None:
         """Reset all fields to empty — call before a new fetch starts."""

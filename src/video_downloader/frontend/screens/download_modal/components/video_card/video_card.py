@@ -4,8 +4,8 @@ from textual.widget import Widget
 
 from src.video_downloader.models.media_info import MediaInfo
 
-from .video_card_widgets.description import Description
-from .video_card_widgets.thumbnail import Thumbnail
+from .components.description import Description
+from .components.thumbnail import Thumbnail
 
 
 class VideoCard(Widget):

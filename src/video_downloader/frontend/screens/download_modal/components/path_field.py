@@ -1,3 +1,5 @@
+import subprocess
+import sys
 from pathlib import Path
 from textual import work
 from textual.app import ComposeResult
@@ -38,14 +40,17 @@ class PathField(InputFieldOrchestrator):
     def default_path(self):
         return DEFAULT_PATH   
        
-    @work(thread=True)
+
     def open_native_picker(self) -> None:
+        # tkinter is not thread safe on windows so i 
+        # have to run this method on the main thread
+        # consider running it with subprocess though
         current = self.query_one("#path-input", Input).value
-        selected = pick_directory_native(initial_dir=current)
+        selected = pick_directory_native(initial_dir=current) 
         if selected:
-            self.app.call_from_thread(
-                setattr, self.query_one("#path-input", Input), "value", selected
-            )
+            self.query_one("#path-input", Input).value = selected
+            
+
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "btn-browse":

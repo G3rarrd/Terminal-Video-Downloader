@@ -7,8 +7,8 @@ from enum import Enum
 from pathlib import Path
 from uuid import UUID, uuid4
 
-
-@dataclass
+from threading import Event
+@dataclass(frozen=True)
 class DownloadJob:
     url: str
     format: FormatInfo
@@ -17,18 +17,13 @@ class DownloadJob:
     id: UUID = field(default_factory=uuid4)
     created_at: datetime = field(default_factory=datetime.now)
     
-    
-    # status: JobStatus = JobStatus.QUEUED
-
-    # progress: float = 0.0
-    # download_bytes : int = 0
-    # total_bytes : int = 0
-    
-    # speed: float | None = None
-    # eta: int | None = None
-    
-    # error: str | None = None
-    
-    # started_at: datetime | None = None
-    # completed_at: datetime | None = None
-    
+class CancellationToken:
+    """A thread-safe flag. UI sets it; worker thread polls it."""
+    def __init__(self):
+        self._event = Event()
+        
+    def cancel(self):
+        self._event.set()
+        
+    def is_cancelled(self):
+        return self._event.is_set()

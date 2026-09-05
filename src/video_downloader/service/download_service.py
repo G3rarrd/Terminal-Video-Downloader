@@ -1,29 +1,31 @@
-from src.video_downloader.models.download_requests import DownloadRequests
+from typing import Callable
+from uuid import UUID
 
+from .download_event_bus import DownloadEventBus, ProgressListener
 from ..backend.yt_dlp.format_processor import FormatProcessor
 from ..backend.yt_dlp.extractor import YtDlpExtractor
 
 from .download_manager import DownloadManager
-
 from ..models.format_selection import FormatSelection
 from ..models.download_job import DownloadJob
 from ..models.format_info import FormatInfo
 
 class DownloadService:
     def __init__(self, manager : DownloadManager):
-        self.manager = manager
+        self._manager = manager
         
-    def add_download_job(self, request : DownloadRequests):
-        job = DownloadJob(
-            url=request.url,
-            format=request.format,
-            filename=request.filename,
-            output_dir=request.output_dir
-        )
-        
-        self.manager.submit_download(job)
-        
+    def add_download_job(self, job : DownloadJob):
+        self._manager.submit_download(job)
         return job
+    
+    def cancel_job(self, job_id: UUID) -> bool:
+        return self._manager.cancel(job_id)
+    
+    def subscribe_to_job(self, job_id: UUID, listener: ProgressListener) -> Callable[[], None]:
+        return self._manager.subscribe_to_job(job_id, listener)
+    
+    def shutdown(self) -> None:
+        self._manager.shutdown()
         
     def extract_metadata(self, url : str):
         processor = FormatProcessor()

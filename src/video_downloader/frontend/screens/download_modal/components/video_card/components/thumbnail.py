@@ -6,12 +6,12 @@ from PIL import Image as PILImage
 from textual import work
 from textual.app import ComposeResult
 from textual.widget import Widget
-from textual.widgets import RichLog
+from textual.widgets import RichLog, Static
 
 from textual_image.widget import Image as TextualImage
 
 
-class Thumbnail(Widget):
+class Thumbnail(Static):
     """A self-contained widget that fetches and displays a thumbnail from a URL."""
     DEFAULT_CSS = """
 
