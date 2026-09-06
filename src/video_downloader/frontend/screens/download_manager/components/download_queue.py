@@ -44,11 +44,20 @@ class DownloadQueue(Widget):
         width: 100%;
         height: 100%;
         border: round $primary;
+        padding: 1;
     }
     
     #job-list{
         width: 100%;
         height: 1fr;
+    }
+    
+    ListItem{
+        margin-bottom: 1
+    }
+    ListItem:focus{
+        background: $boost;
+        border: solid $primary;
     }
     """
     
@@ -63,6 +72,8 @@ class DownloadQueue(Widget):
     def add_job(self, job: DownloadJob) -> None:
         list_view = self.query_one("#job-list", ListView)
         list_view.append(ListItem(DownloadItem(job=job, service=self.service), id=f"job-{job.id}"))
+        self.service.add_download_job(job)
         
     def on_mount(self) -> None:
         self.border_title = "Downloads"
+        

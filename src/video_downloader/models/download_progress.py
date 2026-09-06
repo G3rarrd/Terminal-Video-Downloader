@@ -24,7 +24,7 @@ class DownloadProgress:
     downloaded_bytes: int = 0
     total_bytes: int = 0
     speed: float | None = None
-    eta: int | None = None
+    eta: float | None = None
     error: str | None = None
     started_at: datetime | None = None
     completed_at: datetime | None = None
