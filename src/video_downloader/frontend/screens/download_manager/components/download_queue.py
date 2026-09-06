@@ -61,19 +61,41 @@ class DownloadQueue(Widget):
     }
     """
     
+    class JobAdded(Message):
+        """Message posted when a new download job is created."""
+
+        def __init__(self, job) -> None:
+            super().__init__()
+            self.job = job
+    
     
     def __init__(self, service : DownloadService, **kwargs):
         super().__init__()
         self.service = service
+        self._job_prefix = "job-"
 
     def compose(self) -> ComposeResult:
         yield ListView(id="job-list")
 
     def add_job(self, job: DownloadJob) -> None:
         list_view = self.query_one("#job-list", ListView)
-        list_view.append(ListItem(DownloadItem(job=job, service=self.service), id=f"job-{job.id}"))
+        list_view.append(ListItem(DownloadItem(job=job, service=self.service), id=f"{self._job_prefix}{job.id}" ))
         self.service.add_download_job(job)
         
+    def cancel_job(self):
+        item = self._get_focused_download_item()
+        if item and item.id and item.id.startswith(self._job_prefix):
+            job_uuid : UUID = UUID(item.id.removeprefix(self._job_prefix))
+            self.service.cancel_job(job_uuid)
+    
+    def _get_focused_download_item(self) -> DownloadItem | None:
+        focused = self.app.focused
+        if isinstance(focused, ListView):
+            item: ListItem | None = focused.highlighted_child
+            if item and item.id:
+                return item
+        return None
+    
     def on_mount(self) -> None:
         self.border_title = "Downloads"
         

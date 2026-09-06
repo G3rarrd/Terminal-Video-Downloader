@@ -64,13 +64,6 @@ class YtDlpDownloader:
             ))
             
         except DownloadCancelled as cd:
-            print(f"CAUGHT DownloadCancelled in downloader.download() — actually stopping now\n",
-            f"CAUGHT DownloadCancelled in downloader.download() — actually stopping now\n",
-            f"CAUGHT DownloadCancelled in downloader.download() — actually stopping now\n",
-            f"CAUGHT DownloadCancelled in downloader.download() — actually stopping now\n",
-            f"CAUGHT DownloadCancelled in downloader.download() — actually stopping now\n",
-            f"CAUGHT DownloadCancelled in downloader.download() — actually stopping now\n",
-            f"CAUGHT DownloadCancelled in downloader.download() — actually stopping now\n")
             publish(DownloadProgress(
                 job_id=job.id, 
                 status=JobStatus.CANCELLED
@@ -92,7 +85,7 @@ class YtDlpDownloader:
         publish: Callable[[DownloadProgress], None],
         token : CancellationToken,
     ):
-        print(f"hook called for {job.id}, token id: {id(token)}, is_cancelled: {token.is_cancelled()}")
+
         if token.is_cancelled():
             raise DownloadCancelled("User cancelled download")
         

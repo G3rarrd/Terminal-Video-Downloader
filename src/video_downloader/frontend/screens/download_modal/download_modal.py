@@ -7,6 +7,7 @@ from textual.screen import ModalScreen
 from textual.widgets import Footer, RichLog, Static, Button
 import traceback
 from rich_pixels import Pixels
+from src.video_downloader.frontend.messages import JobAdded
 from src.video_downloader.models.download_job import DownloadJob
 from src.video_downloader.service.download_service import DownloadService
 from src.video_downloader.models.format_info import FormatInfo
@@ -221,6 +222,7 @@ class DownloadModal(ModalScreen[bool]):
         )
         
         self.notify(f"Starting download: {url}")
+
         self.dismiss(job)
 
     def action_close_modal(self) -> None:

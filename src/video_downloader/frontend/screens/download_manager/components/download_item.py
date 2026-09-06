@@ -88,13 +88,8 @@ class DownloadItem(Widget):
             self.progress = progress
             super().__init__()
             
-    class CancelRequested(Message):
-        """Posted when the user clicks Cancel on this row.
-        Not used for control flow directly — DownloadQueue owns the actual
-        service.cancel_job() call, this just signals intent upward."""
-        def __init__(self, job_id: UUID) -> None:
-            self.job_id = job_id
-            super().__init__()
+
+
     
     status: reactive[JobStatus] = reactive(JobStatus.QUEUED)
     downloaded_bytes: reactive[int] = reactive(0)
