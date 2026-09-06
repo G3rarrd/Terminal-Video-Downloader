@@ -41,21 +41,6 @@ class DownloadManager:
         return False
 
     def submit_download(self, job : DownloadJob):
-        print(
-            f"submit_download called for {job.id}",
-            f"submit_download called for {job.id}",
-            f"submit_download called for {job.id}",
-            f"submit_download called for {job.id}",
-            f"submit_download called for {job.id}",
-            f"submit_download called for {job.id}",
-            f"submit_download called for {job.id}",
-            f"submit_download called for {job.id}",
-            f"submit_download called for {job.id}",
-            f"submit_download called for {job.id}",
-            f"submit_download called for {job.id}",
-            f"submit_download called for {job.id}",
-            )
-        # traceback.print_stack()
         token = CancellationToken()
         with self._lock:
             self._tokens[job.id] = token
@@ -72,13 +57,6 @@ class DownloadManager:
         try:
             self._downloader.download(job, self._events.publish, token)
         except DownloadCancelled :
-            print(f"CAUGHT DownloadCancelled in downloader.download() — actually stopping now\n",
-            f"CAUGHT DownloadCancelled in downloader.download() — actually stopping now\n",
-            f"CAUGHT DownloadCancelled in downloader.download() — actually stopping now\n",
-            f"CAUGHT DownloadCancelled in downloader.download() — actually stopping now\n",
-            f"CAUGHT DownloadCancelled in downloader.download() — actually stopping now\n",
-            f"CAUGHT DownloadCancelled in downloader.download() — actually stopping now\n",
-            f"CAUGHT DownloadCancelled in downloader.download() — actually stopping now\n")
             self._events.publish(DownloadProgress(
                 job_id=job.id, 
                 status=JobStatus.CANCELLED

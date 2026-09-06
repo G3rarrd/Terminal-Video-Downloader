@@ -25,6 +25,7 @@ class DownloadManagerScreen(Screen):
 
     def compose(self) -> ComposeResult:
         yield DownloadQueue(service=self.service)
+        # yield JobDetailSection()
         yield Footer()
         
     

@@ -19,6 +19,12 @@ class VideoCard(Widget):
         display: none;
         margin-bottom: 1;
     }
+    
+    #video-card-thumbnail{
+        width: 100%;
+        margin-right: 2;
+        height: 100%; 
+    }
     """
     
     def __init__(self, **kwargs):
@@ -27,22 +33,22 @@ class VideoCard(Widget):
     
     def compose(self) -> ComposeResult:
         yield Grid(
-                Thumbnail(id="thumbnail"),
-                Description(id="description"),
+                Thumbnail(id="video-card-thumbnail"),
+                Description(id="video-card-description"),
                 id="video-card",
             )
         
     def on_mount(self) -> None:
-        self.thumbnail = self.query_one("#thumbnail", Thumbnail)
-        self.description = self.query_one("#description", Description)
+        self.thumbnail = self.query_one("#video-card-thumbnail", Thumbnail)
+        self.description = self.query_one("#video-card-description", Description)
         
     def load(self, metadata : MediaInfo) -> None:
         self.clear()
         if not metadata:
             return
 
-        thumbnail_img_url = metadata.thumbnail
-        self.thumbnail.load(thumbnail_img_url)
+        thumbnail_img = metadata.thumbnail_img
+        self.thumbnail.load(thumbnail_img)
         self.description.load(metadata)
 
         video_card = self.query_one(f"#video-card")

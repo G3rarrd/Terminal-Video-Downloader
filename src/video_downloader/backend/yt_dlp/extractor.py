@@ -1,9 +1,13 @@
+from pathlib import Path
 from typing import Optional
 from curl_cffi import requests
 import yt_dlp
 
 from PIL import Image as PILImage
+import PIL.ImageDraw as PILImageDraw
 import io
+
+from src.video_downloader.utils.img_creation import create_broken_image_placeholder
 from ...models.format_info import FormatType
 from ...models.media_info import MediaInfo
 from ...models.format_info import FormatInfo
@@ -34,20 +38,37 @@ class YtDlpExtractor:
     
     def extract_metadata(self, url : str)-> MediaInfo:
         ydl_opts = get_ytdlp_opts()
+        
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-
             info = ydl.extract_info(url, download=False)
-
+            thumbnail = self._fetch_thumbnail(info.get("thumbnail", None))
             return MediaInfo(
                 title=info.get("title"),
                 uploader=info.get("uploader"),
                 duration=info.get("duration"),
-                thumbnail=info.get("thumbnail"),
+                thumbnail_img=thumbnail,
                 webpage_url=info.get("webpage_url"),
                 domain=info.get("webpage_url_domain"),
                 formats=self._parse_formats(info)
             )
             
+    def _fetch_thumbnail(self, url: str | None) -> PILImage.Image | None :
+        if not url:
+            return create_broken_image_placeholder()
+        
+        try:
+            with requests.Session(impersonate="firefox", timeout=30) as session:
+                response = session.get(url)
+                response.raise_for_status()
+                
+                with io.BytesIO(response.content) as buffer:
+                    img = PILImage.open(buffer)
+                    img.load()
+                return img
+            
+        except Exception as exc:
+            print(f"Failed to fetch thumbnail: {exc}") # change to log later
+            return create_broken_image_placeholder()
 
         
     def _parse_formats(self, info: dict) -> list[FormatInfo]:

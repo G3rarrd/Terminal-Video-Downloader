@@ -41,7 +41,7 @@ def _status_cell(status: JobStatus) -> str:
 class DownloadQueue(Widget):
     DEFAULT_CSS = """
     DownloadQueue{
-        width: 100%;
+        width: 6fr;
         height: 100%;
         border: round $primary;
         padding: 1;
