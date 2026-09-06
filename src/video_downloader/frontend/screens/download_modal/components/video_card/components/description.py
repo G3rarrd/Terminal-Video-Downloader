@@ -38,6 +38,7 @@ class Description(Widget):
     def compose(self) -> ComposeResult:
         yield VerticalScroll(
             Static("", id="desc-title"),
+            Label("", id="desc-domain", classes="desc-row"),
             Label("", id="desc-uploader", classes="desc-row"),
             Label("", id="desc-duration", classes="desc-row"),
 
@@ -59,14 +60,23 @@ class Description(Widget):
         title = metadata.title or "Untitled"
         uploader = metadata.uploader or "Untitled"
         duration = metadata.duration or None
+        domain = metadata.domain or "Untitled"
+        
         # view_count = metadata.
         self.query_one("#desc-title", Static).update(title)
+        
         self.query_one("#desc-uploader", Label).update(
             f"Uploader: " + (uploader if uploader else "?")
         )
+        
         self.query_one("#desc-duration", Label).update(
             f"Duration: " + (convert_duration(int(duration)) if duration else "?")
         )
+        
+        self.query_one("#desc-domain", Label).update(
+            f"Domain: " + (domain if domain else "?")
+        )
+        
         self.display = True
         # self.query_one("#desc-views", Label).update(
         #     f"Views: {view_count:,}" if view_count else ""

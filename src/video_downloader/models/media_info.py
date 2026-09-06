@@ -7,5 +7,6 @@ class MediaInfo:
     uploader: str | None
     duration: int | None
     thumbnail: str | None
+    domain: str | None
     webpage_url: str
     formats : list[FormatInfo] | None

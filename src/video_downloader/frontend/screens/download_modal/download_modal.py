@@ -107,7 +107,7 @@ class DownloadModal(ModalScreen[bool]):
             PathField(id="path-selector"),
             FilenameField(id="filename-field"),
             Button("Add Download", id="download-btn"),
-            Static("[b]enter[/b] confirm/next   [b]tab[/b] next   [b]esc[/b] cancel", id="hint-bar"),
+            Static("[b]enter[/b] [dim]confirm/next[/dim] · [b]tab[/b] [dim]next[/dim] · [b]esc[/b] [dim]cancel[/dim]", id="hint-bar"),
             id="modal-container",
         )
         
@@ -164,8 +164,9 @@ class DownloadModal(ModalScreen[bool]):
             
             self.app.call_from_thread(self._load_download_btn)
             
-        except Exception:
+        except Exception as exc:
             self.app.call_from_thread(lambda: self.notify(f"[bold red]Failed to fetch URL:[/bold red] {traceback.format_exc()}"))
+            self.log.error(exc)
             
         finally:
             self._is_fetching = False

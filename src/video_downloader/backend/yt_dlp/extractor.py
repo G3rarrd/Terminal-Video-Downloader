@@ -44,6 +44,7 @@ class YtDlpExtractor:
                 duration=info.get("duration"),
                 thumbnail=info.get("thumbnail"),
                 webpage_url=info.get("webpage_url"),
+                domain=info.get("webpage_url_domain"),
                 formats=self._parse_formats(info)
             )
             

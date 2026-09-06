@@ -11,11 +11,15 @@ def convert_duration(duration: int) -> str:
 def convert_eta(duration: float) -> str:
     duration = int(duration)
     
+    if not duration:
+        return "unknown"
+    
     hours, remainder = divmod(duration, 3600)
     minutes, seconds = divmod(remainder, 60)
 
     var_names = [hours, minutes, seconds]
     t = ["hours", "minutes", "seconds"]
+    
     while len(var_names) > 1 and var_names[0] == 0:
         var_names.pop(0)
         t.pop(0)

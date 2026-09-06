@@ -1,9 +1,11 @@
+from collections import defaultdict
 from typing import Optional
 
 from textual.app import ComposeResult
 from textual.widget import Widget
 from textual.widgets import Select
 from textual.message import Message
+from src.video_downloader.frontend.screens.download_modal.formats.format_options_fmt import get_ljust, format_label
 from src.video_downloader.models.format_info import FormatInfo
 
 
@@ -49,23 +51,16 @@ class FormatOptions(Widget):
         
         self._formats = video_formats
         self._formats_by_id = {fmt.format_id: fmt for fmt in video_formats}
+
+        ljust_map = get_ljust(video_formats)
         
         options = [
-            (self._format_label(fmt), fmt.format_id) for fmt in video_formats
+            (format_label(fmt, ljust_map), fmt.format_id) for fmt in video_formats
         ]
 
         select = self.query_one(Select)
         select.set_options(options)
         self.display = True
-
-    def _format_label(self, fmt: FormatInfo) -> str:
-        resolution = (fmt.resolution or "?").ljust(10)
-        codec = (fmt.video_codec or "?").ljust(15)
-        size = f"{fmt.filesize / 1_000_000:.1f} MB" if fmt.filesize else "? MB"
-        size = size.ljust(9)
-        extension = (fmt.extension or "?").ljust(5)
-
-        return f"{resolution}· {codec}· {size}· {extension}"
     
     def clear(self) -> None:
         self.display = False
