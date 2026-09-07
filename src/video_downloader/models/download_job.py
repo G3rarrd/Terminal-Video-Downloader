@@ -6,14 +6,19 @@ from .media_info import MediaInfo
 from enum import Enum
 from pathlib import Path
 from uuid import UUID, uuid4
+from PIL import Image as PILImage
 
 from threading import Event
 @dataclass(frozen=True)
 class DownloadJob:
-    url: str
     format: FormatInfo
+    output_dir: Path 
+    url: str
     filename: str
-    output_dir : Path 
+    title: str | None
+    domain: str | None
+    duration: str | None
+    thumbnail: PILImage.Image | None
     id: UUID = field(default_factory=uuid4)
     created_at: datetime = field(default_factory=datetime.now)
     

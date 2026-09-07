@@ -1,23 +1,30 @@
-from textual.app import App, ComposeResult
-from textual.containers import Horizontal, Vertical, VerticalScroll
+from textual.app import ComposeResult
+from textual.containers import VerticalScroll
 from textual.widget import Widget
-from textual.widgets import Header, Footer, ListView, ListItem, Label, Static
+
+from .job_detail_widget.details import Details
+from src.video_downloader.models.download_job import DownloadJob
+from src.video_downloader.service.download_service import DownloadService
+
 
 class JobDetailSection(Widget):
     DEFAULT_CSS = """
-    JobDetailSection{
+    JobDetailSection {
         layout: vertical;
         height: 100%;
         width: 1fr;
     }
     """
-    
-    def __init__(self, **kwargs):
-        super().__init__()
-    
-    
-    
-    def compose(self) -> ComposeResult :
+
+    def __init__(self, service: DownloadService, **kwargs):
+        super().__init__(**kwargs)   # was super().__init__() — kwargs were being dropped
+        self.service = service
+
+    def compose(self) -> ComposeResult:
         yield VerticalScroll(
-            
+            Details(self.service, id="job-details"),
         )
+
+    def show_job(self, job: DownloadJob) -> None:
+        """This is called when selection changes."""
+        self.query_one("#job-details", Details).update_job(job)

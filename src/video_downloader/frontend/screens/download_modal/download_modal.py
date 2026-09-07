@@ -7,15 +7,16 @@ from textual.screen import ModalScreen
 from textual.widgets import Footer, RichLog, Static, Button
 import traceback
 from rich_pixels import Pixels
-from src.video_downloader.frontend.messages import JobAdded
+
 from src.video_downloader.models.download_job import DownloadJob
 from src.video_downloader.service.download_service import DownloadService
 from src.video_downloader.models.format_info import FormatInfo
 from src.video_downloader.models.media_info import MediaInfo
 from src.video_downloader.utils.clean_filename import clean_filename
+from src.video_downloader.utils.conversions import convert_duration
 
 from .components.spinner import Spinner
-from .components.video_card.video_card import VideoCard
+from .components.video_card_widgets.video_card import VideoCard
 from .components.filename_field import FilenameField
 from .components.format_options import FormatOptions
 from .components.path_field import PathField
@@ -200,17 +201,21 @@ class DownloadModal(ModalScreen[bool]):
         
         url = self.media_info.webpage_url
         title = self.media_info.title
+        domain = self.media_info.domain
+        duration = self.media_info.duration
+        thumbnail_img = self.media_info.thumbnail_img
         
         selected_format = format_options.selected_format
         filename = filename_field.value
         output_dir = path_field.value
+        fmt_duration = convert_duration(duration) if duration else None
         
         if not output_dir:
             output_dir = path_field.default_path
         
         if not filename:
             filename = clean_filename(title)
-        
+            
         if not selected_format:
             self.notify("Please select a video format!", severity="error")
             return
@@ -219,7 +224,11 @@ class DownloadModal(ModalScreen[bool]):
             url=url,
             format=selected_format,
             filename=clean_filename(filename),
-            output_dir=Path(output_dir)
+            output_dir=Path(output_dir),
+            domain=domain,
+            thumbnail=thumbnail_img,
+            title=title,
+            duration=fmt_duration
         )
         
         self.notify(f"Starting download: {url}")

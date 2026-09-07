@@ -5,7 +5,7 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.message import Message
 from textual.widget import Widget
-from textual.widgets import Button, ProgressBar, Static
+from textual.widgets import Button, ListItem, ListView, ProgressBar, Static
 
 from src.video_downloader.frontend.screens.download_manager.formats.formats import format_bytes, format_speed
 from src.video_downloader.models.download_job import DownloadJob
@@ -31,7 +31,7 @@ _STATUS_COLORS = {
     JobStatus.CANCELLED: "dimgrey",
 }
 
-class DownloadItem(Widget):
+class DownloadItem(ListItem):
     can_focus = True
     DEFAULT_CSS = """
     DownloadItem {
@@ -45,8 +45,6 @@ class DownloadItem(Widget):
         padding-right: 1;
         background: $boost
     }
-    
-
 
     DownloadItem > Vertical {
         width: 100%;
@@ -87,10 +85,14 @@ class DownloadItem(Widget):
         def __init__(self,  progress: DownloadProgress, **kwargs):
             self.progress = progress
             super().__init__()
-            
-
-
     
+    class Focused(Message):
+        def __init__(self, job : DownloadJob) -> None:
+            self.job = job
+            super().__init__()   
+
+
+
     status: reactive[JobStatus] = reactive(JobStatus.QUEUED)
     downloaded_bytes: reactive[int] = reactive(0)
     total_bytes: reactive[int] = reactive(0)
@@ -99,7 +101,7 @@ class DownloadItem(Widget):
     eta : reactive[float] = reactive(0)
     
     def __init__(self, job: DownloadJob, service: DownloadService, **kwargs) -> None:
-        super().__init__(id=f"download-{job.id}", **kwargs)
+        super().__init__()
         self.job = job
         self._service = service
         self._unsubscribe = None
@@ -162,7 +164,3 @@ class DownloadItem(Widget):
             f"{status} · {eta} · {downloaded_bytes} of {total_bytes} · ({speed})"
         )
 
-
-
-
-    

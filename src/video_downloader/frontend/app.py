@@ -1,7 +1,5 @@
 from textual.app import App
 
-from src.video_downloader.frontend.messages import JobAdded
-
 from .screens.download_manager.components.download_item import DownloadItem
 
 from .screens.download_modal.download_modal import DownloadModal
@@ -33,7 +31,9 @@ class TerminalVideoDownloadManagerApp(App):
         if job is None:
             return
         
-        self.screen.post_message(JobAdded(job))
+        download_screen = self.screen
+        queue = download_screen.query_one(DownloadQueue)
+        queue.add_job(job)
         
     
     def action_cancel_download(self):
