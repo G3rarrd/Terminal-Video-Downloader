@@ -9,6 +9,7 @@ def convert_duration(duration: int) -> str:
     return ":".join(f"{p:02d}" for p in parts)
 
 def convert_eta(duration: float) -> str:
+    """ Formats the eta duraation """
     duration = int(duration)
     
     if not duration:
@@ -18,7 +19,7 @@ def convert_eta(duration: float) -> str:
     minutes, seconds = divmod(remainder, 60)
 
     var_names = [hours, minutes, seconds]
-    t = ["hours", "minutes", "seconds"]
+    t = ["hrs", "mins", "secs"]
     
     while len(var_names) > 1 and var_names[0] == 0:
         var_names.pop(0)

@@ -1,10 +1,11 @@
 from textual.app import App
 
-from .screens.download_manager.components.download_item import DownloadItem
+from .screens.download_manager import DownloadManagerScreen
 
-from .screens.download_modal.download_modal import DownloadModal
-from .screens.download_manager.components.download_queue import DownloadQueue
-from .screens.download_manager.download_manager import DownloadManagerScreen
+
+from .modals.download_modal import DownloadModal
+from .widgets.download_queue.download_queue import DownloadQueue
+
 
 from src.video_downloader.models.download_job import DownloadJob
 from src.video_downloader.service.download_service import DownloadService

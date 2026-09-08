@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import filedialog
 
 def pick_directory_native(initial_dir: str = str(Path.home())) -> str | None:
+    """ Launches the directory selection file dialog """
     root = tk.Tk()
     root.withdraw()          # hide the empty Tk root window
     root.attributes("-topmost", True)  # bring dialog to front

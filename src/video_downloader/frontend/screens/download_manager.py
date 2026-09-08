@@ -2,12 +2,10 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal
 from textual.screen import Screen
 from textual.widgets import Footer
-
-from src.video_downloader.frontend.screens.download_manager.components.download_item import DownloadItem
-from src.video_downloader.frontend.screens.download_manager.components.job_detail_section import JobDetailSection
+from src.video_downloader.frontend.widgets.download_details.job_detail_section import JobDetailSection
+from src.video_downloader.frontend.widgets.download_queue.download_queue import DownloadQueue
 from src.video_downloader.service.download_service import DownloadService
 
-from .components.download_queue import DownloadQueue
 
 # from .download_row import DownloadRow
 

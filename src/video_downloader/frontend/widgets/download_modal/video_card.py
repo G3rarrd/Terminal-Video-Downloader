@@ -1,14 +1,15 @@
 from textual.app import ComposeResult
 from textual.containers import Grid
 from textual.widget import Widget
+from textual.widgets import Static
 
 from src.video_downloader.models.media_info import MediaInfo
 
-from .components.description import Description
-from .components.thumbnail import Thumbnail
+from ..video_card.description import Description
+from ..common.thumbnail import Thumbnail
 
 
-class VideoCard(Widget):
+class VideoCard(Static):
     DEFAULT_CSS = """
     VideoCard #video-card {
         layout: grid;
@@ -56,7 +57,7 @@ class VideoCard(Widget):
         video_card.refresh(layout=True)
         
     def clear(self):
-        widgets : list[Thumbnail | Description]= [ self.thumbnail, self.description]
+        widgets : list[Thumbnail | Description]= [ self.description]
         
         for w in widgets:
             w.clear()

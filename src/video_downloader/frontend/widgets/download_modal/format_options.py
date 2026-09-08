@@ -5,7 +5,7 @@ from textual.app import ComposeResult
 from textual.widget import Widget
 from textual.widgets import Select
 from textual.message import Message
-from src.video_downloader.frontend.screens.download_modal.formats.format_options_fmt import get_ljust, format_label
+from src.video_downloader.frontend.formats.format_options_fmt import get_ljust, format_label
 from src.video_downloader.models.format_info import FormatInfo
 
 

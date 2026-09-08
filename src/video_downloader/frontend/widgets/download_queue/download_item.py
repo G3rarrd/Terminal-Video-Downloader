@@ -1,17 +1,15 @@
-from uuid import UUID
-
 from textual.reactive import reactive
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.message import Message
 from textual.widget import Widget
-from textual.widgets import Button, ListItem, ListView, ProgressBar, Static
+from textual.widgets import Button, ListItem, ProgressBar, Static
 
-from src.video_downloader.frontend.screens.download_manager.formats.formats import format_bytes, format_speed
+from src.video_downloader.frontend.formats.formats import format_bytes, format_speed
 from src.video_downloader.models.download_job import DownloadJob
 from src.video_downloader.models.download_progress import DownloadProgress, JobStatus
 from src.video_downloader.service.download_service import DownloadService
-from src.video_downloader.utils.conversions import convert_duration, convert_eta
+from src.video_downloader.utils.conversions import convert_eta
 
 _STATUS_ICONS = {
     JobStatus.QUEUED: "⏸",
@@ -20,6 +18,8 @@ _STATUS_ICONS = {
     JobStatus.COMPLETED: "✓",
     JobStatus.ERROR: "✕",
     JobStatus.CANCELLED: "⊘",
+    JobStatus.CANCELLING: "◐",
+    JobStatus.STARTING: "◌",
 }
 
 _STATUS_COLORS = {
@@ -29,6 +29,8 @@ _STATUS_COLORS = {
     JobStatus.COMPLETED: "green",
     JobStatus.ERROR: "red",
     JobStatus.CANCELLED: "dimgrey",
+    JobStatus.CANCELLING: "orange1",
+    JobStatus.STARTING: "cyan",
 }
 
 class DownloadItem(ListItem):

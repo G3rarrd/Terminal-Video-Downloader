@@ -8,9 +8,11 @@ from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Button, DirectoryTree, Input, Label
 
+from src.video_downloader.utils.file_dialog import pick_directory_native
+
 from .input_field_orchestrator import InputFieldOrchestrator
 
-from .file_dialog import pick_directory_native
+
 
 DEFAULT_PATH : Path = Path.home()
 

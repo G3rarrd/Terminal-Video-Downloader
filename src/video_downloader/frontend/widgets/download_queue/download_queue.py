@@ -7,9 +7,9 @@ from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import DataTable, ListItem, ListView
 from textual.css.query import NoMatches
-from src.video_downloader.frontend.screens.download_manager.components.job_detail_section import JobDetailSection
-from src.video_downloader.frontend.screens.download_manager.formats.formats import format_bytes, format_speed, render_bar
+from src.video_downloader.frontend.formats.formats import format_bytes, format_speed, render_bar
 from .download_item import DownloadItem
+
 from src.video_downloader.models.download_job import DownloadJob
 from src.video_downloader.models.download_progress import DownloadProgress, JobStatus
 from src.video_downloader.service.download_service import DownloadService
@@ -35,10 +35,10 @@ _STATUS_COLORS = {
     JobStatus.CANCELLED: "dim red",
 }
 
-def _status_cell(status: JobStatus) -> str:
-    icon = _STATUS_ICONS.get(status, "?")
-    color = _STATUS_COLORS.get(status, "white")
-    return f"[{color}]{icon}[/{color}]"
+# def _status_cell(status: JobStatus) -> str:
+#     icon = _STATUS_ICONS.get(status, "?")
+#     color = _STATUS_COLORS.get(status, "white")
+#     return f"[{color}]{icon}[/{color}]"
 
 class DownloadQueue(ListView):
     DEFAULT_CSS = """
@@ -98,5 +98,8 @@ class DownloadQueue(ListView):
             download item or job is currently highlighted
         """
         self.post_message(self.JobHighlighted(job))
+        
+    def on_mount(self):
+        self.border_title = "downloads"
         
         

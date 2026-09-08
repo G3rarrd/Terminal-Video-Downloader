@@ -56,14 +56,16 @@ class DownloadManager:
     def _download(self, job : DownloadJob, token: CancellationToken):
         try:
             self._downloader.download(job, self._events.publish, token)
+        
         except DownloadCancelled :
             self._events.publish(DownloadProgress(
                 job_id=job.id, 
                 status=JobStatus.CANCELLED
             ))
             raise
+        
         except Exception as exc:
-            pass
+            raise
             
         finally:
             # download completed, cancelled or failed

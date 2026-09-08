@@ -2,7 +2,7 @@ from textual.app import ComposeResult
 from textual.containers import VerticalScroll
 from textual.widget import Widget
 
-from .job_detail_widget.details import Details
+from .details import Details
 from src.video_downloader.models.download_job import DownloadJob
 from src.video_downloader.service.download_service import DownloadService
 

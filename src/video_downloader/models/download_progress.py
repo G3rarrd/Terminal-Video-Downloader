@@ -14,7 +14,9 @@ class JobStatus(Enum):
     FAILED = "failed"
     COMPLETED = "completed"
     PROCESSING = "processing"
-    ERROR = "error" 
+    ERROR = "error"
+    CANCELLING = "cancelling"
+    STARTING = "starting" 
 
 @dataclass(frozen=True)
 class DownloadProgress:

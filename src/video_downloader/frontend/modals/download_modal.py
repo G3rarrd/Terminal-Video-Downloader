@@ -6,7 +6,6 @@ from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Footer, RichLog, Static, Button
 import traceback
-from rich_pixels import Pixels
 
 from src.video_downloader.models.download_job import DownloadJob
 from src.video_downloader.service.download_service import DownloadService
@@ -15,12 +14,12 @@ from src.video_downloader.models.media_info import MediaInfo
 from src.video_downloader.utils.clean_filename import clean_filename
 from src.video_downloader.utils.conversions import convert_duration
 
-from .components.spinner import Spinner
-from .components.video_card_widgets.video_card import VideoCard
-from .components.filename_field import FilenameField
-from .components.format_options import FormatOptions
-from .components.path_field import PathField
-from .components.url_field import URLField
+from ..widgets.download_modal.spinner import Spinner
+from ..widgets.download_modal.video_card import VideoCard
+from ..widgets.download_modal.filename_field import FilenameField
+from ..widgets.download_modal.format_options import FormatOptions
+from ..widgets.download_modal.path_field import PathField
+from ..widgets.download_modal.url_field import URLField
 
 
 class DownloadModal(ModalScreen[bool]):

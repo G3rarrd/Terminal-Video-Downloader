@@ -3,7 +3,7 @@ from textual.containers import Horizontal, Vertical
 from textual.widget import Widget
 from textual.widgets import Label, Static
 
-from src.video_downloader.frontend.screens.download_modal.components.video_card_widgets.components.thumbnail import Thumbnail
+from src.video_downloader.frontend.widgets.common.thumbnail import Thumbnail
 from src.video_downloader.models.download_job import DownloadJob
 from src.video_downloader.service.download_service import DownloadService
 

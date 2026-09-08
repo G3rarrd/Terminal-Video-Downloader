@@ -33,7 +33,7 @@ class YtDlpDownloader:
 
         publish(DownloadProgress(
             job_id=job.id,
-            status=JobStatus.QUEUED,
+            status=JobStatus.STARTING,
             started_at=datetime.now(),
         ))
         

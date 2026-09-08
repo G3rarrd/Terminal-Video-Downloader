@@ -15,7 +15,6 @@ class Thumbnail(Static):
     """A self-contained widget that fetches and displays a thumbnail from a URL."""
     DEFAULT_CSS = """
 
-
     Thumbnail #thumbnail-image {
         width: auto;
         height: auto;
