@@ -34,6 +34,7 @@ class DownloadManagerScreen(Screen):
         detail_section = self.query_one(JobDetailSection)
         if (event.job):
             detail_section.show_job(event.job)
+            
     
     # def on_job_added(self, event: JobAdded) -> None:
     #     """Textual automatically routes 'JobAdded' to 'on_job_added'."""

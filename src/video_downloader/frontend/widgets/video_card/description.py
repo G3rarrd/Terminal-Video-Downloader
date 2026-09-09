@@ -8,9 +8,8 @@ from src.video_downloader.utils.conversions import convert_duration
 
 
 
-class Description(Widget):
+class Description(VerticalScroll):
     """A self-contained widget that displays video metadata (title, uploader, duration, etc.)."""
-
     DEFAULT_CSS = """
         Description {
             height: 100%;
@@ -33,18 +32,17 @@ class Description(Widget):
             width: 100%;
             color: $text-muted;
         }
-    """
+        """
+
+
 
     def compose(self) -> ComposeResult:
-        yield VerticalScroll(
-            Static("", id="desc-title"),
-            Label("", id="desc-domain", classes="desc-row"),
-            Label("", id="desc-uploader", classes="desc-row"),
-            Label("", id="desc-duration", classes="desc-row"),
+        yield Static("", id="desc-title")
+        yield Label("", id="desc-domain", classes="desc-row")
+        yield Label("", id="desc-uploader", classes="desc-row")
+        yield Label("", id="desc-duration", classes="desc-row")
 
-            id="desc-body",
-        )
-        
+
     def on_mount(self) -> None:
         self.display = False
         
@@ -78,15 +76,11 @@ class Description(Widget):
         )
         
         self.display = True
-        # self.query_one("#desc-views", Label).update(
-        #     f"Views: {view_count:,}" if view_count else ""
-        # )
-        
 
 
     def clear(self) -> None:
         """Reset all fields to empty — call before a new fetch starts."""
-        for widget_id in ("#desc-title", "#desc-uploader", "#desc-duration"):
+        for widget_id in ("#desc-title", "#desc-uploader", "#desc-domain", "#desc-duration"):
             self.query_one(widget_id).update("")
         self.display = False
 

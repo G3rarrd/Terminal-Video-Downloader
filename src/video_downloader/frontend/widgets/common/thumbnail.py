@@ -13,29 +13,34 @@ from textual_image.widget import Image as TextualImage
 
 class Thumbnail(Static):
     """A self-contained widget that fetches and displays a thumbnail from a URL."""
-    DEFAULT_CSS = """
-
-    Thumbnail #thumbnail-image {
+    DEFAULT_CSS = \
+    """
+    Thumbnail .thumbnail-image {
         width: auto;
         height: auto;
         max-height: 10; 
     }
 
     """
-    def compose(self) -> ComposeResult:
-        yield TextualImage(id="thumbnail-image")
         
     def on_mount(self) -> None:
         self.display = False
-        
-    def load(self, thumbnail : PILImage.Image | None) -> None:
-        if not thumbnail:
+
+    def load(self, image: PILImage.Image | None) -> None:
+        if image is None:
+            self.clear()
             return
-        self.query_one("#thumbnail-image", TextualImage).image = thumbnail
+
+        self.clear()
+
+        self.mount(
+            TextualImage(image, classes="thumbnail-image")
+        )
+
         self.display = True
-        
+
     def clear(self) -> None:
+        for image in self.query(".thumbnail-image"):
+            image.remove()
+
         self.display = False
-        img_widget = self.query_one("#thumbnail-image", TextualImage)
-        img_widget.image = None
-        img_widget.refresh(layout=True)
