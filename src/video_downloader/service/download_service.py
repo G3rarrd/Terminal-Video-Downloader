@@ -1,7 +1,7 @@
 from typing import Callable
 from uuid import UUID
 
-from .download_event_bus import DownloadEventBus, ProgressListener
+from .download_event_bus import DownloadEventBus, ProgressListener, TotalProgressListener
 from ..backend.yt_dlp.format_processor import FormatProcessor
 from ..backend.yt_dlp.extractor import YtDlpExtractor
 
@@ -23,6 +23,9 @@ class DownloadService:
     
     def subscribe_to_job(self, job_id: UUID, listener: ProgressListener) -> Callable[[], None]:
         return self._manager.subscribe_to_job(job_id, listener)
+    
+    def subscribe_to_total_progress(self, listener: TotalProgressListener) -> Callable[[], None]:
+        return self._manager.subscribe_to_total_progress(listener)
     
     def shutdown(self) -> None:
         self._manager.shutdown()

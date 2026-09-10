@@ -83,11 +83,7 @@ class DownloadItem(ListItem):
         height: 1;
     }
     """
-    class ProgressUpdated(Message):
-        def __init__(self,  progress: DownloadProgress, **kwargs):
-            self.progress = progress
-            super().__init__()
-    
+
     class Focused(Message):
         def __init__(self, job : DownloadJob) -> None:
             self.job = job
@@ -95,18 +91,17 @@ class DownloadItem(ListItem):
 
 
 
-    status: reactive[JobStatus] = reactive(JobStatus.QUEUED)
-    downloaded_bytes: reactive[int] = reactive(0)
-    total_bytes: reactive[int] = reactive(0)
-    speed: reactive[float | None] = reactive(None)
-    progress: reactive[float] = reactive(0.0)
-    eta : reactive[float] = reactive(0)
+
     
     def __init__(self, job: DownloadJob, service: DownloadService, **kwargs) -> None:
         super().__init__()
         self.job = job
         self._service = service
         self._unsubscribe = None
+        
+        self._latest: DownloadProgress | None = None
+        self._rendered_status: JobStatus | None = None  # last status we actually painted
+        self._rendered_pct: float | None = None
 
     def compose(self) -> ComposeResult:
         yield Static("⏸", id="status-icon")
@@ -117,7 +112,13 @@ class DownloadItem(ListItem):
         )
         
     def on_mount(self) -> None:
+        # Cache widget references once instead of querying by ID on every update.
+        self._status_icon = self.query_one("#status-icon", Static)
+        self._progress_bar = self.query_one("#job-progress", ProgressBar)
+        self._progress_info = self.query_one("#progress-info", Static)
+        
         self._unsubscribe = self._service.subscribe_to_job(self.job.id, self._on_progress)
+        self.set_interval(0.25, self._update_display)  # fixed render cadence
     
     def on_unmount(self) -> None:
         if self._unsubscribe:
@@ -125,7 +126,7 @@ class DownloadItem(ListItem):
 
     def _on_progress(self, progress: DownloadProgress) -> None:
         # called from a backend worker thread — post_message is the thread-safe hop
-        self.post_message(self.ProgressUpdated(progress))
+        self._latest = progress
         
     def on_download_item_progress_updated(self, event: "DownloadItem.ProgressUpdated") -> None:
         p = event.progress
@@ -141,28 +142,33 @@ class DownloadItem(ListItem):
         color = _STATUS_COLORS.get(status, "white")
         return f"[{color}]{icon}[/{color}]"
 
-    def watch_status(self, status: JobStatus) -> None:
-        eta = convert_eta(self.eta)
-        downloaded_bytes = format_bytes(self.downloaded_bytes)
-        total_bytes = format_bytes(self.total_bytes)
-        status_text = self.status.value
-        speed = format_speed(self.speed)
-        self.query_one("#status-icon", Static).update(self._status_cell(self.status))
-        self.query_one("#progress-info", Static).update(
-            f"{status_text} · {eta} · {downloaded_bytes} of {total_bytes} · ({speed})"
-        )
-        color = _STATUS_COLORS.get(status, "white")
-        self.styles.border_left = ("thick", color)   # tuple, not a string
-        
-    
-    def watch_progress(self, pct: float) -> None:
-        eta = convert_eta(self.eta)
-        downloaded_bytes = format_bytes(self.downloaded_bytes)
-        total_bytes = format_bytes(self.total_bytes)
-        status = self.status.value
-        speed = format_speed(self.speed)
-        self.query_one("#job-progress", ProgressBar).update(progress=pct)
-        self.query_one("#progress-info", Static).update(
-            f"{status} · {eta} · {downloaded_bytes} of {total_bytes} · ({speed})"
-        )
+    def _update_display(self) -> None:
+        p = self._latest
+        if p is None:
+            return  # nothing new since last mount/tick
 
+        pct = p.progress_pct
+
+        # Skip the progress bar + label update if nothing visible actually changed —
+        # avoids repainting on sub-percent-point float jitter between fragments.
+        pct_changed = self._rendered_pct is None or abs(pct - self._rendered_pct) >= 0.1
+        status_changed = p.status != self._rendered_status
+
+        if not pct_changed and not status_changed:
+            return
+
+        info_text = (
+            f"{p.status.value} · {convert_eta(p.eta or 0)} · "
+            f"{format_bytes(p.downloaded_bytes)} of {format_bytes(p.total_bytes)} · "
+            f"({format_speed(p.speed)})"
+        )
+        self._progress_info.update(info_text)  # one write, not two
+
+        if pct_changed:
+            self._progress_bar.update(progress=pct)
+            self._rendered_pct = pct
+
+        if status_changed:
+            self._status_icon.update(self._status_cell(p.status))
+            self.styles.border_left = ("thick", _STATUS_COLORS.get(p.status, "white"))
+            self._rendered_status = p.status

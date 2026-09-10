@@ -5,7 +5,7 @@ from uuid import UUID
 import traceback
 from yt_dlp.utils import DownloadCancelled
 
-from src.video_downloader.service.download_event_bus import DownloadEventBus, ProgressListener
+from src.video_downloader.service.download_event_bus import DownloadEventBus, ProgressListener, TotalProgressListener
 
 from ..models.download_progress import DownloadProgress, JobStatus
 from ..models.download_job import CancellationToken, DownloadJob
@@ -53,15 +53,14 @@ class DownloadManager:
     def subscribe_to_job(self, job_id: UUID, listener: ProgressListener) -> Callable[[], None]:
         return self._events.subscribe_to_job(job_id, listener)
 
+    def subscribe_to_total_progress(self, listener: TotalProgressListener) -> Callable[[], None]:
+        return self._events.subscribe_to_total_progress(listener)
+    
     def _download(self, job : DownloadJob, token: CancellationToken):
         try:
             self._downloader.download(job, self._events.publish, token)
         
-        except DownloadCancelled :
-            self._events.publish(DownloadProgress(
-                job_id=job.id, 
-                status=JobStatus.CANCELLED
-            ))
+        except DownloadCancelled:
             raise
         
         except Exception as exc:

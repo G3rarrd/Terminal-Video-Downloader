@@ -15,6 +15,7 @@ class DownloadManagerScreen(Screen):
         DownloadManagerScreen {
             width: 100%;
             height: 100%;
+            background: $background;
         }
     """
     )

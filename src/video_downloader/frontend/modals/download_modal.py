@@ -87,9 +87,12 @@ class DownloadModal(ModalScreen[bool]):
     """
 
     BINDINGS = [
-        Binding(key="escape", action="close_modal", description="cancel"),
+        Binding("enter", "submit", "confirm/next", show=True, priority=True),
+        Binding("tab", "app.focus_next", "next", show=True, priority=True),
+        Binding("escape", "cancel", "cancel", show=True, priority=True),
+        Binding("d", "add_download", "add download", show=True, priority=True),
     ]
-    
+        
     def __init__(self, service : DownloadService, **kwargs):
 
         super().__init__()
@@ -106,8 +109,7 @@ class DownloadModal(ModalScreen[bool]):
             FormatOptions(id="format-options"),
             PathField(id="path-selector"),
             FilenameField(id="filename-field"),
-            Button("Add Download", id="download-btn"),
-            Static("[b]enter[/b] [dim]confirm/next[/dim] · [b]tab[/b] [dim]next[/dim] · [b]esc[/b] [dim]cancel[/dim]", id="hint-bar"),
+            Footer(),
             id="modal-container",
         )
         
@@ -120,7 +122,6 @@ class DownloadModal(ModalScreen[bool]):
     def on_mount(self) -> None:
         widget = self.query_one("#modal-container")
         widget.border_title = "Add Download"
-        self._clear_download_btn()
         
     def _reset(self) -> None:
         for selector, widget_type in (
@@ -130,8 +131,8 @@ class DownloadModal(ModalScreen[bool]):
             ("#filename-field", FilenameField),
         ):
             self.query_one(selector, widget_type).clear()
-            
-        self._clear_download_btn()
+        self.refresh_bindings()
+
 
     @work(thread=True)
     def fetch_metadata(self, url_text: str) -> None:
@@ -162,8 +163,6 @@ class DownloadModal(ModalScreen[bool]):
             filename_field = self.query_one("#filename-field", FilenameField)
             self.app.call_from_thread(filename_field.load)
             
-            self.app.call_from_thread(self._load_download_btn)
-            
         except Exception as exc:
             self.app.call_from_thread(lambda: self.notify(f"[bold red]Failed to fetch URL:[/bold red] {traceback.format_exc()}"))
             self.log.error(exc)
@@ -172,28 +171,19 @@ class DownloadModal(ModalScreen[bool]):
             self._is_fetching = False
             self.app.call_from_thread(spinner.clear)
 
-    @on(URLField.Submitted)
-    def on_url_field_submitted(self, event: URLField.Submitted) -> None:
-        event.stop()
-        
-        if self._is_fetching:
-            return
+    def action_add_download(self):
+        self._download_pipeline()
 
-        if not event.url:
-            self.notify("URL cannot be empty", severity="error")
-            return
-
-        self._reset()
+    def action_cancel(self) -> None:
+        self.dismiss()
         
-        self.notify(f"[green]Fetching URL info for:[/green] {event.url}")
+    def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
+        if action == "add_download":
+            format_options = self.query_one("#format-options", FormatOptions)
+            return bool(format_options.selected_format)
+        return True
         
-        self.fetch_metadata(event.url)
-        
-        
-    @on(Button.Pressed, "#download-btn")
-    def on_download_pressed(self, event: Button.Pressed) -> None:
-        event.stop()
-
+    def _download_pipeline(self):
         format_options = self.query_one("#format-options", FormatOptions)
         filename_field = self.query_one("#filename-field", FilenameField)
         path_field = self.query_one("#path-selector", PathField)
@@ -233,6 +223,33 @@ class DownloadModal(ModalScreen[bool]):
         self.notify(f"Starting download: {url}")
 
         self.dismiss(job)
+        
+    @on(FormatOptions.FormatSelected)
+    def on_format_options_format_selected(self, event: FormatOptions.FormatSelected) -> None:
+        self.refresh_bindings()
+        
+    @on(Button.Pressed, "#download-btn")
+    def on_download_pressed(self, event: Button.Pressed) -> None:
+        event.stop()
+        self._download_pipeline()
+
+    @on(URLField.Submitted)
+    def on_url_field_submitted(self, event: URLField.Submitted) -> None:
+        event.stop()
+        
+        if self._is_fetching:
+            return
+
+        if not event.url:
+            self.notify("URL cannot be empty", severity="error")
+            return
+
+        self._reset()
+        
+        self.notify(f"[green]Fetching URL info for:[/green] {event.url}")
+        
+        self.fetch_metadata(event.url)
+        
 
     def action_close_modal(self) -> None:
         self.dismiss(None)

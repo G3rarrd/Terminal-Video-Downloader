@@ -1,8 +1,10 @@
-def convert_duration(duration: int) -> str:
-    hours, remainder = divmod(duration, 3600)
-    minutes, seconds = divmod(remainder, 60)
+def convert_duration(duration: float) -> str:
+    hours = int(duration // 3600)
+    minutes = int((duration % 3600) // 60)
+    seconds = int(duration % 60)
 
     parts = [hours, minutes, seconds]
+
     while len(parts) > 1 and parts[0] == 0:
         parts.pop(0)
 

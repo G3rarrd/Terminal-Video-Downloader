@@ -12,6 +12,9 @@ from src.video_downloader.backend.yt_dlp.config import get_ytdlp_opts
 
 
 class YtDlpDownloader:
+    def __init__(self):
+        self._total_bytes = 0
+        self._downloaded_bytes = 0
     
     def _build_selector(self, fmt : FormatInfo) -> str:
         if fmt.format_type == FormatType.VIDEO_ONLY:
@@ -19,7 +22,10 @@ class YtDlpDownloader:
             
         return fmt.format_id
     
-    def _build_merge_format(self, fmt: FormatInfo) -> str:
+    def _build_merge_format(self, fmt: FormatInfo) -> str | None:
+        if fmt.format_type == FormatType.AUDIO_ONLY:
+            return None
+
         if fmt.extension in ("mp4", "webm", "mkv"):
             return fmt.extension
 
@@ -46,10 +52,16 @@ class YtDlpDownloader:
             ydl_extra_opts = {
                 "format": selector,
                 "outtmpl": str(job.output_dir / f"{filename}.%(ext)s"),
-                "merge_output_format": output_fmt,
                 "socket_timeout": 10,
-                "progress_hooks" : [lambda data : self._on_ytdlp_progress(job, data, publish, token)]
+                "progress_hooks" : [
+                    lambda data : self._on_ytdlp_progress(
+                        job, data, publish, token
+                    )
+                ],
             }
+            
+            if output_fmt:
+                ydl_extra_opts["merge_output_format"] = output_fmt
             
             ydl_opts = get_ytdlp_opts(ydl_extra_opts)
             
@@ -59,14 +71,20 @@ class YtDlpDownloader:
             publish(DownloadProgress(
                 job_id=job.id,
                 status=JobStatus.COMPLETED,
+                downloaded_bytes=self._downloaded_bytes,
+                total_bytes=self._total_bytes,
                 progress_pct=100.0,
                 completed_at=datetime.now()
             ))
             
+            
         except DownloadCancelled as cd:
             publish(DownloadProgress(
                 job_id=job.id, 
-                status=JobStatus.CANCELLED
+                status=JobStatus.CANCELLED,
+                downloaded_bytes=self._downloaded_bytes,
+                total_bytes=self._total_bytes,
+                eta=None,
             ))
             raise
             
@@ -74,6 +92,8 @@ class YtDlpDownloader:
             publish(DownloadProgress(
                 job_id=job.id,
                 status=JobStatus.ERROR,
+                downloaded_bytes=self._downloaded_bytes,
+                total_bytes=self._total_bytes,
                 error=str(e),
             ))
             raise
@@ -99,22 +119,22 @@ class YtDlpDownloader:
         match status:
             case "downloading":
 
-                downloaded_bytes = data.get("downloaded_bytes", 0)
+                self._downloaded_bytes = data.get("downloaded_bytes", 0)
                 
-                total_bytes = (
+                self._total_bytes = (
                     data.get("total_bytes")
                     or data.get("total_bytes_estimate")
                     or 0
                 )
                 
-                percentage = (downloaded_bytes / total_bytes * 100) if total_bytes else 0.0
+                percentage = (self._downloaded_bytes / self._total_bytes * 100) if self._total_bytes else 0.0
                 
                 return DownloadProgress(
                     job_id=job.id,
                     status=JobStatus.DOWNLOADING,
                     progress_pct=percentage,
-                    downloaded_bytes=downloaded_bytes,
-                    total_bytes=total_bytes,
+                    downloaded_bytes=self._downloaded_bytes,
+                    total_bytes=self._total_bytes,
                     speed=data.get("speed", 0.0),
                     eta=data.get("eta", 0)
                 )

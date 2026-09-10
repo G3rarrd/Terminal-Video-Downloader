@@ -30,3 +30,9 @@ class DownloadProgress:
     error: str | None = None
     started_at: datetime | None = None
     completed_at: datetime | None = None
+    
+@dataclass(frozen=True)
+class AggregateProgress:
+    total_speed: float
+    active_job_count: int
+    total_downloaded_bytes: int

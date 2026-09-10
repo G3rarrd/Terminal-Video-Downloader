@@ -43,10 +43,12 @@ _STATUS_COLORS = {
 class DownloadQueue(ListView):
     DEFAULT_CSS = """
     DownloadQueue{
-        width: 3fr;
+        width: 2fr;
         height: 100%;
         border: round $primary;
+        border-title-color: $secondary;
         padding: 1;
+        background: $surface;
     }
     
     DownloadItem {
@@ -65,9 +67,7 @@ class DownloadQueue(ListView):
         def __init__(self, job: DownloadJob | None) -> None:
             self.job = job
             super().__init__()
-            
 
-    
     selected_job: reactive[DownloadJob | None] = reactive(None)
     
     def __init__(self, service : DownloadService, **kwargs):
@@ -88,6 +88,9 @@ class DownloadQueue(ListView):
         
         self.service.cancel_job(cur_job.id)
         
+    def open_job(self, job: DownloadJob) -> None:
+        pass
+  
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
         item = event.item
         if isinstance(item, DownloadItem):
@@ -101,5 +104,6 @@ class DownloadQueue(ListView):
         
     def on_mount(self):
         self.border_title = "downloads"
+        self.styles.background = self.parent.styles.background
         
         

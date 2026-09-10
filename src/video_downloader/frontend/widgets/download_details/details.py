@@ -14,11 +14,12 @@ class Details(Widget):
 
     DEFAULT_CSS = """
     Details {
-        height: auto;
+        height: 2fr;
         width: 100%;
         padding: 1 2;
         border: round $primary;
         border-title-align: center;
+        border-title-color: $secondary;
     }
     
     Details #thumbnail-detail {
@@ -81,7 +82,7 @@ class Details(Widget):
         )
     
     def on_mount(self):
-        self.styles.border_title = "detail"
+        self.border_title = "detail"
 
     def compose(self) -> ComposeResult:
         yield Thumbnail(id="thumbnail-detail")

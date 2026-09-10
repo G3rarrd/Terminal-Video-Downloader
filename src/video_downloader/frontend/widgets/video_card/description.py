@@ -68,7 +68,7 @@ class Description(VerticalScroll):
         )
         
         self.query_one("#desc-duration", Label).update(
-            f"Duration: " + (convert_duration(int(duration)) if duration else "?")
+            f"Duration: " + (convert_duration(duration) if duration else "?")
         )
         
         self.query_one("#desc-domain", Label).update(
