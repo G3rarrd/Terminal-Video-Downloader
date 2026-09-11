@@ -15,7 +15,6 @@ class DownloadManager:
     def __init__(self, events : DownloadEventBus,  worker_count=3):
         self._download_executor = ThreadPoolExecutor(max_workers=worker_count)
         self._events : DownloadEventBus = events
-        self._downloader = YtDlpDownloader()
         self._tokens : dict[UUID, CancellationToken]= {}
         self._futures : dict[UUID, Future] = {}
         self._lock = Lock()
@@ -58,7 +57,8 @@ class DownloadManager:
     
     def _download(self, job : DownloadJob, token: CancellationToken):
         try:
-            self._downloader.download(job, self._events.publish, token)
+            downloader = YtDlpDownloader()
+            downloader.download(job, self._events.publish, token)
         
         except DownloadCancelled:
             raise

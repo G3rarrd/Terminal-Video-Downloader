@@ -9,27 +9,29 @@ import yt_dlp
 from typing import Callable, Optional
 from src.video_downloader.backend.yt_dlp.config import get_ytdlp_opts
 
-
-
 class YtDlpDownloader:
     def __init__(self):
-        self._total_bytes = 0
-        self._downloaded_bytes = 0
+        self._total_bytes = 0.0
+        self._downloaded_bytes = 0.0
     
-    def _build_selector(self, fmt : FormatInfo) -> str:
-        if fmt.format_type == FormatType.VIDEO_ONLY:
-            return f"{fmt.format_id}+bestaudio/{fmt.format_id}"
-            
+    def _build_selector(self, video_fmt : FormatInfo, audio_fmt : FormatInfo) -> str:
+        if video_fmt is None and audio_fmt is None:
+            raise ValueError("At least one of video_fmt or audio_fmt must be provided")
+        
+        # The user selected both video and audio formats
+        if video_fmt and audio_fmt:
+            return f"{video_fmt.format_id}+{audio_fmt.format_id}/{video_fmt.format_id}"
+        
+        # The user selected only the video without an audio so lets pick the best audio for him/her
+        if video_fmt and video_fmt.format_type == FormatType.VIDEO_ONLY:
+            return f"{video_fmt.format_id}+bestaudio/{video_fmt.format_id}"
+        
+        # audio, combined, and unknow format id is used then since the user only selected 
+        # audio or both formats were either available or unavailable
+        fmt = video_fmt or audio_fmt
+
         return fmt.format_id
-    
-    def _build_merge_format(self, fmt: FormatInfo) -> str | None:
-        if fmt.format_type == FormatType.AUDIO_ONLY:
-            return None
-
-        if fmt.extension in ("mp4", "webm", "mkv"):
-            return fmt.extension
-
-        return "mp4"
+        
 
     def download(
         self, job: DownloadJob, 
@@ -43,11 +45,9 @@ class YtDlpDownloader:
             started_at=datetime.now(),
         ))
         
-        output_fmt = self._build_merge_format(job.format)
-        
-        selector = self._build_selector(job.format)
-        
+        selector = self._build_selector(job.video_format, job.audio_format)
         filename = job.filename or "%(title)s"
+        
         try:
             ydl_extra_opts = {
                 "format": selector,
@@ -60,8 +60,7 @@ class YtDlpDownloader:
                 ],
             }
             
-            if output_fmt:
-                ydl_extra_opts["merge_output_format"] = output_fmt
+            ydl_extra_opts["merge_output_format"] = job.ext or "mp4"
             
             ydl_opts = get_ytdlp_opts(ydl_extra_opts)
             
@@ -127,12 +126,12 @@ class YtDlpDownloader:
                     or 0
                 )
                 
-                percentage = (self._downloaded_bytes / self._total_bytes * 100) if self._total_bytes else 0.0
+                percent = (self._downloaded_bytes / self._total_bytes * 100) if self._total_bytes else 0.0
                 
                 return DownloadProgress(
                     job_id=job.id,
                     status=JobStatus.DOWNLOADING,
-                    progress_pct=percentage,
+                    progress_pct=percent,
                     downloaded_bytes=self._downloaded_bytes,
                     total_bytes=self._total_bytes,
                     speed=data.get("speed", 0.0),

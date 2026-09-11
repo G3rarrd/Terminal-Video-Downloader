@@ -11,7 +11,7 @@ from src.video_downloader.models.download_job import DownloadJob
 from src.video_downloader.service.download_service import DownloadService
 from src.video_downloader.models.format_info import FormatInfo
 from src.video_downloader.models.media_info import MediaInfo
-from src.video_downloader.utils.clean_filename import clean_filename
+from src.video_downloader.utils.file_utils import clean_filename
 from src.video_downloader.utils.conversions import convert_duration
 
 from ..widgets.download_modal.spinner import Spinner
@@ -35,7 +35,7 @@ class DownloadModal(ModalScreen[bool]):
         height: auto;
         border: round $primary;
         border-title-align: left;
-        border-title-color: $text;
+        border-title-color: $secondary;
         border-title-background: $surface;
         background: $surface;
         margin: 1 2;
@@ -90,7 +90,7 @@ class DownloadModal(ModalScreen[bool]):
         Binding("enter", "submit", "confirm/next", show=True, priority=True),
         Binding("tab", "app.focus_next", "next", show=True, priority=True),
         Binding("escape", "cancel", "cancel", show=True, priority=True),
-        Binding("d", "add_download", "add download", show=True, priority=True),
+        Binding("d", "add_download", "add download", show=True),
     ]
         
     def __init__(self, service : DownloadService, **kwargs):
@@ -144,10 +144,12 @@ class DownloadModal(ModalScreen[bool]):
         try:
 
             metadata = self.service.extract_metadata(url_text)
-
+            print(metadata)
             self.media_info = metadata.media
             
+            
             video_formats : list[FormatInfo] = metadata.video_formats
+            audio_formats : list[FormatInfo] = metadata.audio_formats
 
             self.app.call_from_thread(lambda: self.notify(f"[green]Got metadata:[/green] {self.media_info.title}"))
 
@@ -155,7 +157,7 @@ class DownloadModal(ModalScreen[bool]):
             self.app.call_from_thread(video_card.load, self.media_info)
 
             format_options = self.query_one("#format-options", FormatOptions)
-            self.app.call_from_thread(format_options.load, video_formats)
+            self.app.call_from_thread(lambda : format_options.load(video_formats, audio_formats))
 
             path_field = self.query_one("#path-selector", PathField)
             self.app.call_from_thread(path_field.load)
@@ -173,16 +175,26 @@ class DownloadModal(ModalScreen[bool]):
 
     def action_add_download(self):
         self._download_pipeline()
-
+        
     def action_cancel(self) -> None:
         self.dismiss()
         
     def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
         if action == "add_download":
             format_options = self.query_one("#format-options", FormatOptions)
-            return bool(format_options.selected_format)
+            video_f, audio_f = format_options.selected_formats
+            return bool(video_f or audio_f)
         return True
-        
+    
+    def _get_file_extension(self, video_format: FormatInfo, audio_format: FormatInfo):
+        ext : str | None = None
+        if audio_format:
+            ext = audio_format.extension
+            
+        if video_format:
+            ext = video_format.extension
+            
+        return ext
     def _download_pipeline(self):
         format_options = self.query_one("#format-options", FormatOptions)
         filename_field = self.query_one("#filename-field", FilenameField)
@@ -194,8 +206,13 @@ class DownloadModal(ModalScreen[bool]):
         duration = self.media_info.duration
         thumbnail_img = self.media_info.thumbnail_img
         
-        selected_format = format_options.selected_format
+        video_format, audio_format = format_options.selected_formats
+        
+        # we are assuming that video format and audio format if they exist contain an extension
+        ext : str | None = self._get_file_extension(video_format, audio_format)
+        
         filename = filename_field.value
+        
         output_dir = path_field.value
         fmt_duration = convert_duration(duration) if duration else None
         
@@ -203,21 +220,25 @@ class DownloadModal(ModalScreen[bool]):
             output_dir = path_field.default_path
         
         if not filename:
-            filename = clean_filename(title)
+            filename = title
             
-        if not selected_format:
-            self.notify("Please select a video format!", severity="error")
-            return
+        filename = clean_filename(filename)
+            
+        # if not video_format:
+        #     self.notify("Please select a video format at least!", severity="error")
+        #     return
         
         job = DownloadJob(
             url=url,
-            format=selected_format,
-            filename=clean_filename(filename),
+            filename=filename,
+            video_format=video_format,
+            audio_format=audio_format,
             output_dir=Path(output_dir),
             domain=domain,
             thumbnail=thumbnail_img,
             title=title,
-            duration=fmt_duration
+            duration=fmt_duration,
+            ext=ext
         )
         
         self.notify(f"Starting download: {url}")

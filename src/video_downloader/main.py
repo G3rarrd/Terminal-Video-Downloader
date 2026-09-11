@@ -9,17 +9,13 @@ from .service.download_manager import DownloadManager
 
 
 event_bus = DownloadEventBus()
-
 download_manager = DownloadManager(event_bus, 3)
-
 service = DownloadService(download_manager)
-
 app = TerminalVideoDownloadManagerApp(service)
-app.run()
 
-download_manager.shutdown()
-# def main():
-    
+def main():
+    app.run()
+    download_manager.shutdown()
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()

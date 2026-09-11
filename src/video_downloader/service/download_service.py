@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Callable
 from uuid import UUID
 
@@ -20,6 +21,27 @@ class DownloadService:
     
     def cancel_job(self, job_id: UUID) -> bool:
         return self._manager.cancel(job_id)
+    
+    def open_job(self, job: DownloadJob) -> None:
+        file_path = job.output_dir / f"{job.filename}.{job.ext}"
+        
+        if not file_path.exists():
+            raise FileNotFoundError(file_path)
+        
+        return path
+    
+    def _start_file(self, filepath : Path):
+        system = platform.system()
+
+        if system == "Windows":
+            os.startfile(filepath)
+
+        elif system == "Darwin":
+            subprocess.run(["open", str(filepath)], check=False)
+
+        elif system == "Linux":
+            subprocess.run(["xdg-open", str(filepath)], check=False)
+        path = self._construct_format_path(cur_job)
     
     def subscribe_to_job(self, job_id: UUID, listener: ProgressListener) -> Callable[[], None]:
         return self._manager.subscribe_to_job(job_id, listener)

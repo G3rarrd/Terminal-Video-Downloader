@@ -33,8 +33,8 @@ class DownloadManagerScreen(Screen):
     
     def on_download_queue_job_highlighted(self, event: DownloadQueue.JobHighlighted) -> None:  # depends on how you signal selection change
         detail_section = self.query_one(JobDetailSection)
-        if (event.job):
-            detail_section.show_job(event.job)
+        if (event.item):
+            detail_section.show_job(event.item.job)
             
     
     # def on_job_added(self, event: JobAdded) -> None:

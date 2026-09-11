@@ -1,4 +1,8 @@
+import os
+from pathlib import Path
+import platform
 import re
+import subprocess
 import unicodedata
 
 
@@ -20,3 +24,18 @@ def clean_filename(text: str) -> str:
         text = "download"
 
     return text
+
+
+
+def start_file(self, filepath : Path):
+    system = platform.system()
+
+    if system == "Windows":
+        os.startfile(filepath)
+
+    elif system == "Darwin":
+        subprocess.run(["open", str(filepath)], check=False)
+
+    elif system == "Linux":
+        subprocess.run(["xdg-open", str(filepath)], check=False)
+

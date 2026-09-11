@@ -1,5 +1,5 @@
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Vertical
+from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.widget import Widget
 from textual.widgets import Label, Static
 
@@ -9,7 +9,7 @@ from src.video_downloader.models.download_job import DownloadJob
 from src.video_downloader.service.download_service import DownloadService
 
 
-class Details(Widget):
+class Details(VerticalScroll):
     """Shows metadata for the currently selected job in the queue."""
 
     DEFAULT_CSS = """
@@ -19,7 +19,7 @@ class Details(Widget):
         padding: 1 2;
         border: round $primary;
         border-title-align: center;
-        border-title-color: $secondary;
+        border-title-color: $secondary
     }
     
     Details #thumbnail-detail {
@@ -109,4 +109,6 @@ class Details(Widget):
         
         for field_name in self._FIELDS:
             value = getattr(job, field_name)
+            if field_name == "filename":
+                value = f"{value}.{job.ext}"
             self.query_one(f"#{field_name}-info", Label).update(str(value))

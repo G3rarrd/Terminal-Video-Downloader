@@ -10,6 +10,7 @@ from ..common.thumbnail import Thumbnail
 
 
 class VideoCard(Static):
+    can_focus = False
     DEFAULT_CSS = """
     VideoCard #video-card {
         layout: grid;
@@ -30,7 +31,6 @@ class VideoCard(Static):
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
     
     def compose(self) -> ComposeResult:
         yield Grid(

@@ -6,10 +6,12 @@ def get_ytdlp_opts(
     extra_opts: Optional[Dict[str, Any]] = None,
     cookie_path: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Base options for yt-dlp with anti-bot evasion and curl-cffi TLS impersonation."""
+    """Base options for yt-dlp with anti-bot evasion and curl-cffi TLS impersonation.
+    and js runtimes for executing dynamic EJS challenges """
+    
     opts: Dict[str, Any] = {
-        "impersonate": "firefox",
-        'js_runtimes': {'deno': {}, 'node': {}},
+        "impersonate": "firefox", # default browser impersonation (can be replaced using the extra opts argument "{'impersonate':'chrome'}")
+        'js_runtimes': {'deno': {}, 'node': {}}, # Very important! ensure you have one of node or deno installed 
         # 'extractor_args': {'youtube': {'player_client': ['web', 'android', 'ios']}},
         "quiet": True,
         "no_warnings": True,

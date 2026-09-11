@@ -11,10 +11,12 @@ from PIL import Image as PILImage
 from threading import Event
 @dataclass(frozen=True)
 class DownloadJob:
-    format: FormatInfo
+    video_format: FormatInfo
+    audio_format: FormatInfo
     output_dir: Path 
     url: str
     filename: str
+    ext: str | None
     title: str | None
     domain: str | None
     duration: str | None

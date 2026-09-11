@@ -138,9 +138,11 @@ class NetworkGraph(Horizontal):
             round(ymax * i / (n_ticks - 1))
             for i in range(n_ticks)
         ]
+        
         tick_labels = [" " + format_speed(v) + " " for v in tick_values]
 
         primary = Color.parse(self.app.theme_variables["primary"]).rgb
+        secondary = Color.parse(self.app.theme_variables["secondary"])
 
         plt.clear_data()
         plt.bar(
@@ -151,9 +153,7 @@ class NetworkGraph(Horizontal):
         )
         plt.xticks([])
         plt.ylim(0, ymax)
-        plt.yticks(tick_values, tick_labels, yside="right")
-        plt.ticks_color(
-            self.app.theme_variables.get("text-muted", "gray")
-        )
+        plt.yticks(tick_values, tick_labels, yside="right",)
+        plt.ticks_color(secondary)
 
         plot_widget.refresh()

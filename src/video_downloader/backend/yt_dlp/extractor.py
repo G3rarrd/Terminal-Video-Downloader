@@ -53,7 +53,7 @@ class YtDlpExtractor:
             )
             
     def _fetch_thumbnail(self, url: str | None) -> PILImage.Image | None :
-        if not url:
+        if url is None:
             return create_broken_image_placeholder()
         
         try:

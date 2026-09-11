@@ -1,3 +1,7 @@
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
 [project]
 name = "video-downloader"
 version = "0.1.0"
@@ -15,7 +19,8 @@ dependencies = [
     "rich-pixels (>=3.0.1,<4.0.0)",
     "rich (>=15.0.0,<16.0.0)",
     "textual-plotext (>=1.0.1,<2.0.0)",
-    "textual-plot (>=0.10.1,<0.11.0)"
+    "textual-plot (>=0.10.1,<0.11.0)",
+    "pytest (>=9.1.1,<10.0.0)"
 ]
 
 [tool.poetry]
@@ -24,3 +29,8 @@ packages = [{include = "video_downloader", from = "src"}]
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "pytest-asyncio (>=1.4.0,<2.0.0)"
+]

@@ -22,15 +22,15 @@ _STATUS_ICONS = {
     JobStatus.STARTING: "◌",
 }
 
-_STATUS_COLORS = {
-    JobStatus.QUEUED: "dimgrey",
-    JobStatus.DOWNLOADING: "cyan",
-    JobStatus.PROCESSING: "yellow",
-    JobStatus.COMPLETED: "green",
-    JobStatus.ERROR: "red",
-    JobStatus.CANCELLED: "dimgrey",
-    JobStatus.CANCELLING: "orange1",
-    JobStatus.STARTING: "cyan",
+_STATUS_THEME_COLORS = {
+    JobStatus.QUEUED: "foreground",
+    JobStatus.DOWNLOADING: "primary",
+    JobStatus.PROCESSING: "secondary",
+    JobStatus.COMPLETED: "success",
+    JobStatus.ERROR: "error",
+    JobStatus.CANCELLED: "foreground",
+    JobStatus.CANCELLING: "warning",
+    JobStatus.STARTING: "primary",
 }
 
 class DownloadItem(ListItem):
@@ -45,7 +45,8 @@ class DownloadItem(ListItem):
         align: center middle;
         padding-left: 1;
         padding-right: 1;
-        background: $boost
+        background: $boost;
+        margin-bottom: 1;
     }
 
     DownloadItem > Vertical {
@@ -59,6 +60,7 @@ class DownloadItem(ListItem):
         width: 1;
         height: 3;
         content-align: center middle;
+        
     }
 
     DownloadItem #filename {
@@ -82,6 +84,8 @@ class DownloadItem(ListItem):
         width: 100%;
         height: 1;
     }
+    
+
     """
 
     class Focused(Message):
@@ -89,10 +93,6 @@ class DownloadItem(ListItem):
             self.job = job
             super().__init__()   
 
-
-
-
-    
     def __init__(self, job: DownloadJob, service: DownloadService, **kwargs) -> None:
         super().__init__()
         self.job = job
@@ -102,11 +102,12 @@ class DownloadItem(ListItem):
         self._latest: DownloadProgress | None = None
         self._rendered_status: JobStatus | None = None  # last status we actually painted
         self._rendered_pct: float | None = None
+        self.status = JobStatus.QUEUED
 
     def compose(self) -> ComposeResult:
         yield Static("⏸", id="status-icon")
         yield Vertical(
-            Static(self.job.filename, id="filename"),
+            Static(f"{self.job.filename}.{self.job.ext}", id="filename"),
             ProgressBar(total=100, id="job-progress",  show_eta=False, show_percentage=False),
             Static(f"queued · - · - of - · (-)", id="progress-info")
         )
@@ -130,17 +131,22 @@ class DownloadItem(ListItem):
         
     def on_download_item_progress_updated(self, event: "DownloadItem.ProgressUpdated") -> None:
         p = event.progress
+        
         self.status = p.status
         self.downloaded_bytes = p.downloaded_bytes
         self.total_bytes = p.total_bytes
         self.speed = p.speed
         self.eta = p.eta or 0
         self.progress = p.progress_pct
-        
+
     def _status_cell(self, status: JobStatus) -> str:
         icon = _STATUS_ICONS.get(status, "?")
-        color = _STATUS_COLORS.get(status, "white")
+        color = self._status_color(status)
         return f"[{color}]{icon}[/{color}]"
+    
+    def _status_color(self, status: JobStatus) -> str:
+        theme_name = _STATUS_THEME_COLORS.get(status, "foreground")
+        return self.app.theme_variables.get(theme_name, "white")
 
     def _update_display(self) -> None:
         p = self._latest
@@ -170,5 +176,8 @@ class DownloadItem(ListItem):
 
         if status_changed:
             self._status_icon.update(self._status_cell(p.status))
-            self.styles.border_left = ("thick", _STATUS_COLORS.get(p.status, "white"))
+            self.styles.border_left = (
+                "thick",
+                self._status_color(p.status),
+            )
             self._rendered_status = p.status
